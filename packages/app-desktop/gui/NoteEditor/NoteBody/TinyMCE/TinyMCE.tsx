@@ -357,161 +357,169 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 		const element = document.createElement('style');
 		element.setAttribute('id', 'tinyMceStyle');
 		document.head.appendChild(element);
-		element.appendChild(document.createTextNode(`
-			.joplin-tinymce .tox-editor-header {
-				padding-left: ${styles.leftExtraToolbarContainer.width + styles.leftExtraToolbarContainer.padding * 2}px;
-				padding-right: ${styles.rightExtraToolbarContainer.width + styles.rightExtraToolbarContainer.padding * 2}px;
-			}
-			
-			.tox .tox-toolbar,
-			.tox .tox-toolbar__overflow,
-			.tox .tox-toolbar__primary,
-			.tox-editor-header .tox-toolbar__primary,
-			.tox .tox-toolbar-overlord,
-			.tox.tox-tinymce-aux .tox-toolbar__overflow,
-			.tox .tox-statusbar,
-			.tox .tox-dialog__header,
-			.tox .tox-dialog,
-			.tox textarea,
-			.tox input,
-			.tox .tox-dialog__footer {
-				background-color: ${theme.backgroundColor} !important;
-			}
+		const data = `
+		.joplin-tinymce .tox-editor-header {
+			padding-left: ${styles.leftExtraToolbarContainer.width + styles.leftExtraToolbarContainer.padding * 2}px;
+			padding-right: ${styles.rightExtraToolbarContainer.width + styles.rightExtraToolbarContainer.padding * 2}px;
+		}
+		
+		.tox .tox-toolbar,
+		.tox .tox-toolbar__overflow,
+		.tox .tox-toolbar__primary,
+		.tox-editor-header .tox-toolbar__primary,
+		.tox .tox-toolbar-overlord,
+		.tox.tox-tinymce-aux .tox-toolbar__overflow,
+		.tox .tox-statusbar,
+		.tox .tox-dialog__header,
+		.tox .tox-dialog,
+		.tox textarea,
+		.tox input,
+		.tox .tox-dialog__footer {
+			background-color: ${theme.backgroundColor} !important;
+		}
 
-			.tox .tox-dialog__body-content {
-				color: ${theme.color};
-			}
+		.tox .tox-dialog__body-content {
+			color: ${theme.color};
+		}
 
-			/*
-			When creating dialogs, TinyMCE doesn't seem to offer a way to style the components or to assign classes to them.
-			We want the code dialog box text area to be monospace, and since we can't target this precisely, we apply the style
-			to all textareas of all dialogs. As I think only the code dialog displays a textarea that should be fine.
-			*/
-			
-			.tox .tox-dialog textarea {
-				font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
-			}
+		/*
+		When creating dialogs, TinyMCE doesn't seem to offer a way to style the components or to assign classes to them.
+		We want the code dialog box text area to be monospace, and since we can't target this precisely, we apply the style
+		to all textareas of all dialogs. As I think only the code dialog displays a textarea that should be fine.
+		*/
+		
+		.tox .tox-dialog textarea {
+			font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+		}
 
-			.tox .tox-dialog-wrap__backdrop {
-				background-color: ${theme.backgroundColor} !important;
-				opacity:0.7
-			}
-			
-			.tox .tox-editor-header {
-				border: none;
-			}
+		.tox .tox-dialog-wrap__backdrop {
+			background-color: ${theme.backgroundColor} !important;
+			opacity:0.7
+		}
+		
+		.tox .tox-editor-header {
+			border: none;
+		}
 
-			.tox .tox-tbtn,
-			.tox .tox-tbtn svg,
-			.tox .tox-dialog__header,
-			.tox .tox-button--icon .tox-icon svg,
-			.tox .tox-button.tox-button--icon .tox-icon svg,
-			.tox textarea,
-			.tox input,
-			.tox .tox-label,
-			.tox .tox-toolbar-label {
-				color: ${theme.color3} !important;
-				fill: ${theme.color3} !important;
-			}
+		.tox .tox-tbtn,
+		.tox .tox-tbtn svg,
+		.tox .tox-dialog__header,
+		.tox .tox-button--icon .tox-icon svg,
+		.tox .tox-button.tox-button--icon .tox-icon svg,
+		.tox textarea,
+		.tox input,
+		.tox .tox-label,
+		.tox .tox-toolbar-label {
+			color: ${theme.color3} !important;
+			fill: ${theme.color3} !important;
+		}
 
-			.tox .tox-statusbar a,
-			.tox .tox-statusbar__path-item,
-			.tox .tox-statusbar__wordcount,
-			.tox .tox-statusbar__path-divider {
-				color: ${theme.color};
-				fill: ${theme.color};
-				opacity: 0.7;
-			}
+		.tox .tox-statusbar a,
+		.tox .tox-statusbar__path-item,
+		.tox .tox-statusbar__wordcount,
+		.tox .tox-statusbar__path-divider {
+			color: ${theme.color};
+			fill: ${theme.color};
+			opacity: 0.7;
+		}
 
-			.tox .tox-tbtn--enabled,
-			.tox .tox-tbtn--enabled:hover {
-				background-color: ${theme.selectedColor};
-			}
+		.tox .tox-tbtn--enabled,
+		.tox .tox-tbtn--enabled:hover {
+			background-color: ${theme.selectedColor};
+		}
 
-			.tox .tox-button--naked:hover:not(:disabled) {
-				background-color: ${theme.backgroundColor} !important;
-			}
-			
-			.tox .tox-tbtn:focus {
-				background-color: ${theme.backgroundColor3}
-			}
-			
-			.tox .tox-tbtn:hover {
-				color: ${theme.colorHover3} !important;
-				fill: ${theme.colorHover3} !important;
-				background-color: ${theme.backgroundColorHover3}
-			}			
-			
+		.tox .tox-button--naked:hover:not(:disabled) {
+			background-color: ${theme.backgroundColor} !important;
+		}
+		
+		.tox .tox-tbtn:focus {
+			background-color: ${theme.backgroundColor3}
+		}
+		
+		.tox .tox-tbtn:hover {
+			color: ${theme.colorHover3} !important;
+			fill: ${theme.colorHover3} !important;
+			background-color: ${theme.backgroundColorHover3}
+		}			
+		
 
-			.tox .tox-tbtn {
-				height: ${theme.toolbarHeight}px;
-				min-height: ${theme.toolbarHeight}px;
-				margin: 0;
-			}
-
-
-			.tox .tox-tbtn[aria-haspopup=true] {
-				width: ${theme.toolbarHeight + 15}px;
-				min-width: ${theme.toolbarHeight + 15}px;
-			}
-
-			.tox .tox-tbtn > span,
-			.tox .tox-tbtn:active > span,
-			.tox .tox-tbtn:hover > span {
-				transform: scale(0.8);
-			}
-
-			.tox .tox-toolbar__primary,
-			.tox .tox-toolbar__overflow {
-				background: none;
-				background-color: ${theme.backgroundColor3} !important;
-			}
-
-			.tox-tinymce,
-			.tox .tox-toolbar__group,
-			.tox.tox-tinymce-aux .tox-toolbar__overflow,
-			.tox .tox-dialog__footer {
-				border: none !important;
-			}
-
-			.tox-tinymce {
-				border-top: none !important;
-			}
-
-			/* Override the TinyMCE font styles with more specific CSS selectors.
-			   Without this, the built-in FontAwesome styles are not applied because
-			   they are overridden by TinyMCE. */
-			.plugin-icon.fa, .plugin-icon.far, .plugin-icon.fas {
-				font-family: "Font Awesome 5 Free";
-				font-size: ${theme.toolbarHeight - theme.toolbarPadding}px;
-			}
-			
-			.plugin-icon.fa, .plugin-icon.fas {
-				font-weight: 900;
-			}
-
-			.plugin-icon.fab, .plugin-icon.far {
-				font-weight: 400;
-			}
+		.tox .tox-tbtn {
+			height: ${theme.toolbarHeight}px;
+			min-height: ${theme.toolbarHeight}px;
+			margin: 0;
+		}
 
 
-			.joplin-tinymce .tox-toolbar__group {
-				background-color: ${theme.backgroundColor3};
-				padding-top: ${theme.toolbarPadding}px;
-				padding-bottom: ${theme.toolbarPadding}px;
-			}
+		.tox .tox-tbtn[aria-haspopup=true] {
+			width: ${theme.toolbarHeight + 15}px;
+			min-width: ${theme.toolbarHeight + 15}px;
+		}
 
-			.joplin-tinymce .tox .tox-edit-area__iframe {
-				background-color: ${theme.backgroundColor} !important;
-			}
+		.tox .tox-tbtn > span,
+		.tox .tox-tbtn:active > span,
+		.tox .tox-tbtn:hover > span {
+			transform: scale(0.8);
+		}
 
-			.joplin-tinymce .tox .tox-toolbar__primary {
-				/* This component sets an empty svg with a white background as the background
-				 * which needs to be cleared to prevent it from flashing white in dark themes */
-				background: none;
-				background-color: ${theme.backgroundColor3} !important;
-			}
-		`));
+		.tox .tox-toolbar__primary,
+		.tox .tox-toolbar__overflow {
+			background: none;
+			background-color: ${theme.backgroundColor3} !important;
+		}
+
+		.tox-tinymce,
+		.tox .tox-toolbar__group,
+		.tox.tox-tinymce-aux .tox-toolbar__overflow,
+		.tox .tox-dialog__footer {
+			border: none !important;
+		}
+
+		.tox-tinymce {
+			border-top: none !important;
+		}
+
+		/* Override the TinyMCE font styles with more specific CSS selectors.
+		   Without this, the built-in FontAwesome styles are not applied because
+		   they are overridden by TinyMCE. */
+		.plugin-icon.fa, .plugin-icon.far, .plugin-icon.fas {
+			font-family: "Font Awesome 5 Free";
+			font-size: ${theme.toolbarHeight - theme.toolbarPadding}px;
+		}
+		
+		.plugin-icon.fa, .plugin-icon.fas {
+			font-weight: 900;
+		}
+
+		.plugin-icon.fab, .plugin-icon.far {
+			font-weight: 400;
+		}
+
+		table {
+			width: 100%;
+			overflow: auto;
+			text-align: center;
+		}
+
+
+		.joplin-tinymce .tox-toolbar__group {
+			background-color: ${theme.backgroundColor3};
+			padding-top: ${theme.toolbarPadding}px;
+			padding-bottom: ${theme.toolbarPadding}px;
+		}
+
+		.joplin-tinymce .tox .tox-edit-area__iframe {
+			background-color: ${theme.backgroundColor} !important;
+		}
+
+		.joplin-tinymce .tox .tox-toolbar__primary {
+			/* This component sets an empty svg with a white background as the background
+			 * which needs to be cleared to prevent it from flashing white in dark themes */
+			background: none;
+			background-color: ${theme.backgroundColor3} !important;
+		}
+	`;
+		reg.logger().info('TinyMce: createTextNode data:', data);
+		element.appendChild(document.createTextNode(data));
 
 		return () => {
 			document.head.removeChild(element);
@@ -571,7 +579,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 				width: '100%',
 				body_class: 'jop-tinymce',
 				height: '100%',
-				resize: false,
+				resize: true,
 				icons: 'Joplin',
 				icons_url: 'gui/NoteEditor/NoteBody/TinyMCE/icons.js',
 				plugins: 'noneditable link joplinLists hr searchreplace codesample table',
@@ -582,19 +590,21 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 				// See https://www.tiny.cloud/docs/configure/content-filtering/#controlcharacters
 				valid_elements: '#p,*[*]',
 
-				menubar: false,
-				relative_urls: false,
-				branding: false,
-				statusbar: false,
-				target_list: false,
+				menubar: true,
+				relative_urls: true,
+				branding: true,
+				statusbar: true,
+				target_list: true,
 				// Handle the first table row as table header.
 				// https://www.tiny.cloud/docs/plugins/table/#table_header_type
 				table_header_type: 'sectionCells',
-				table_resize_bars: false,
+				table_sizing_mode: 'relative',
+				table_resize_bars: true,
+				// table_toolbar: '',
 				language_url: ['en_US', 'en_GB'].includes(language) ? undefined : `${bridge().vendorDir()}/lib/tinymce/langs/${language}`,
 				toolbar: toolbar.join(' '),
 				localization_function: _,
-				contextmenu: false,
+				contextmenu: true,
 				browser_spellcheck: true,
 				formats: {
 					joplinHighlight: { inline: 'mark', remove: 'all' },
@@ -847,6 +857,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 
 			if (lastOnChangeEventInfo.current.content !== props.content || !resourcesEqual) {
 				const result = await props.markupToHtml(props.contentMarkupLanguage, props.content, markupRenderOptions({ resourceInfos: props.resourceInfos }));
+				reg.logger().info('TinyMce::loadContent result:', JSON.stringify(result));
 				if (cancelled) return;
 
 				editor.setContent(awfulBrHack(result.html));

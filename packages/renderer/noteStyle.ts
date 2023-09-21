@@ -234,10 +234,15 @@ export default function(theme: any, options: Options = null) {
 
 		.jop-tinymce table,
 		table {
-			text-align: left;
+			text-align: center;
 			border-collapse: collapse;
 			border: 1px solid ${theme.codeBorderColor};
 			background-color: ${theme.backgroundColor};
+
+
+			width: 100%;
+			max-height: 600px;
+			overflow: scroll;
 		}
 
 		.jop-tinymce table td, .jop-tinymce table th,
