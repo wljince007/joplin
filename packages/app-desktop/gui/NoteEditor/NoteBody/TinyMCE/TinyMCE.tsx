@@ -600,6 +600,9 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 				table_header_type: 'sectionCells',
 				table_sizing_mode: 'relative',
 				table_resize_bars: true,
+				table_default_styles: {
+					width: '50%',
+				},
 				// table_toolbar: '',
 				language_url: ['en_US', 'en_GB'].includes(language) ? undefined : `${bridge().vendorDir()}/lib/tinymce/langs/${language}`,
 				toolbar: toolbar.join(' '),
@@ -857,6 +860,8 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 
 			if (lastOnChangeEventInfo.current.content !== props.content || !resourcesEqual) {
 				const result = await props.markupToHtml(props.contentMarkupLanguage, props.content, markupRenderOptions({ resourceInfos: props.resourceInfos }));
+				result.html = result.html.replace('<table', '<div  style="overflow-x: scroll;" >\n<table');
+				result.html = result.html.replace('</table>', '</table>\n</div>');
 				reg.logger().info('TinyMce::loadContent result:', JSON.stringify(result));
 				if (cancelled) return;
 
