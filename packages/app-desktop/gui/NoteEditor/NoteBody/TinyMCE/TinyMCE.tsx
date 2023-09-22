@@ -579,7 +579,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 				width: '100%',
 				body_class: 'jop-tinymce',
 				height: '100%',
-				resize: true,
+				resize: false,
 				icons: 'Joplin',
 				icons_url: 'gui/NoteEditor/NoteBody/TinyMCE/icons.js',
 				plugins: 'noneditable link joplinLists hr searchreplace codesample table',
@@ -590,24 +590,26 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 				// See https://www.tiny.cloud/docs/configure/content-filtering/#controlcharacters
 				valid_elements: '#p,*[*]',
 
-				menubar: true,
-				relative_urls: true,
-				branding: true,
-				statusbar: true,
-				target_list: true,
+
+				// table_sizing_mode: 'relative',
+				// table_default_styles: {
+				// 	width: '50%',
+				// },
+				// table_toolbar: '',
+
+				menubar: false,
+				relative_urls: false,
+				branding: false,
+				statusbar: false,
+				target_list: false,
 				// Handle the first table row as table header.
 				// https://www.tiny.cloud/docs/plugins/table/#table_header_type
 				table_header_type: 'sectionCells',
-				table_sizing_mode: 'relative',
-				table_resize_bars: true,
-				table_default_styles: {
-					width: '50%',
-				},
-				// table_toolbar: '',
+				table_resize_bars: false,
 				language_url: ['en_US', 'en_GB'].includes(language) ? undefined : `${bridge().vendorDir()}/lib/tinymce/langs/${language}`,
 				toolbar: toolbar.join(' '),
 				localization_function: _,
-				contextmenu: true,
+				contextmenu: false,
 				browser_spellcheck: true,
 				formats: {
 					joplinHighlight: { inline: 'mark', remove: 'all' },
@@ -862,6 +864,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 				const result = await props.markupToHtml(props.contentMarkupLanguage, props.content, markupRenderOptions({ resourceInfos: props.resourceInfos }));
 				result.html = result.html.replace('<table', '<div  style="overflow-x: scroll;" >\n<table');
 				result.html = result.html.replace('</table>', '</table>\n</div>');
+				result.html = result.html.replace('<div id="rendered-md">', '<div id="rendered-md" style="overflow-x: hidden;" >');
 				reg.logger().info('TinyMce::loadContent result:', JSON.stringify(result));
 				if (cancelled) return;
 
