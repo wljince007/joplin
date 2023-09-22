@@ -1,4 +1,4 @@
 cd ../../
 yarn run buildParallel
 cd -
-metro
+npx react-native start
