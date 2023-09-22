@@ -238,11 +238,7 @@ export default function(theme: any, options: Options = null) {
 			border-collapse: collapse;
 			border: 1px solid ${theme.codeBorderColor};
 			background-color: ${theme.backgroundColor};
-
-
-			width: 100%;
-			max-height: 600px;
-			overflow: scroll;
+			overflow-x: auto;
 		}
 
 		.jop-tinymce table td, .jop-tinymce table th,
@@ -363,6 +359,8 @@ export default function(theme: any, options: Options = null) {
 
 		.mce-content-body .joplin-editable {
 			cursor: pointer !important;
+			overflow-x: hidden;
+			overflow-y: hidden;
 		}
 
 		.mce-content-body.mce-content-readonly {
@@ -395,6 +393,8 @@ export default function(theme: any, options: Options = null) {
 			padding: 0;
 			color: inherit;
 			font-size: inherit;
+			overflow-x: hidden;
+			overflow-y: hidden;
 		}
 
 		/* To make code blocks horizontally scrollable */

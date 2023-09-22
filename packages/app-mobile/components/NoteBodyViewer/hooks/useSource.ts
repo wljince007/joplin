@@ -127,6 +127,10 @@ export default function useSource(noteBody: string, noteMarkupLanguage: number, 
 				rendererTheme,
 				mdOptions,
 			);
+			result.html = result.html.replace('<table', '<div  style="overflow-x: scroll; overflow-y: hidden;" >\n<table');
+			result.html = result.html.replace('</table>', '</table>\n</div>');
+			result.html = result.html.replace('<div id="rendered-md">', '<div id="rendered-md" style="overflow-x: hidden;" >');
+			logger.info('useSource::loadContent result:', JSON.stringify(result));
 
 			if (cancelled) return;
 

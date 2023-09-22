@@ -648,6 +648,10 @@ function CodeMirror(props: NoteBodyEditorProps, ref: any) {
 				noteId: props.noteId,
 				vendorDir: bridge().vendorDir(),
 			}));
+			result.html = result.html.replace('<table', '<div  style="overflow-x: scroll; overflow-y: hidden;" >\n<table');
+			result.html = result.html.replace('</table>', '</table>\n</div>');
+			result.html = result.html.replace('<div id="rendered-md">', '<div id="rendered-md" style="overflow-x: hidden;" >');
+			reg.logger().info('CodeMirror::loadContent result:', JSON.stringify(result));
 
 			if (cancelled) return;
 
