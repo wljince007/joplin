@@ -59,6 +59,8 @@ interface RendererPlugins {
 
 // /!\/!\ Note: the order of rules is important!! /!\/!\
 const rules: RendererRules = {
+	table_open: require('./MdToHtml/rules/table_open').default,
+	table_close: require('./MdToHtml/rules/table_close').default,
 	fence: require('./MdToHtml/rules/fence').default,
 	sanitize_html: require('./MdToHtml/rules/sanitize_html').default,
 	image: require('./MdToHtml/rules/image').default,

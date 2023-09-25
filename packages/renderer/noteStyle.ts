@@ -232,13 +232,21 @@ export default function(theme: any, options: Options = null) {
 			opacity: ${theme.blockQuoteOpacity};
 		}
 
+		#rendered-md {
+			overflow-x: hidden;
+		}
+
+		.joplin-table-div{
+			overflow-x: scroll;
+		}
+
 		.jop-tinymce table,
 		table {
 			text-align: center;
 			border-collapse: collapse;
 			border: 1px solid ${theme.codeBorderColor};
 			background-color: ${theme.backgroundColor};
-			overflow-x: auto;
+			
 		}
 
 		.jop-tinymce table td, .jop-tinymce table th,
@@ -327,6 +335,10 @@ export default function(theme: any, options: Options = null) {
 
 		.exported-note {
 			padding: 1em;
+		}
+
+		.joplin-editable {
+			overflow-x: hidden;
 		}
 
 		.joplin-editable .joplin-source {

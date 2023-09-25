@@ -862,11 +862,11 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 
 			if (lastOnChangeEventInfo.current.content !== props.content || !resourcesEqual) {
 				const result = await props.markupToHtml(props.contentMarkupLanguage, props.content, markupRenderOptions({ resourceInfos: props.resourceInfos }));
-				result.html = result.html.split('<table').join('<div  style="overflow-x: scroll; overflow-y: hidden;" >\n<table');
-				result.html = result.html.split('</table>').join('</table>\n</div>');
-				result.html = result.html.split('<div id="rendered-md">').join('<div id="rendered-md" style="overflow-x: hidden;" >');
-				result.html = result.html.split('<div class="joplin-editable"').join('<div class="joplin-editable" style="overflow-x: hidden;"');
-				result.html = result.html.split('<pre class="joplin-source"').join('<pre class="joplin-source" style="overflow-x: hidden;"');
+				// result.html = result.html.split('<table').join('<div  style="overflow-x: scroll; overflow-y: hidden;" >\n<table');
+				// result.html = result.html.split('</table>').join('</table>\n</div>');
+				// result.html = result.html.split('<div id="rendered-md">').join('<div id="rendered-md" style="overflow-x: hidden;" >');
+				// result.html = result.html.split('<div class="joplin-editable"').join('<div class="joplin-editable" style="overflow-x: hidden;"');
+				// result.html = result.html.split('<pre class="joplin-source"').join('<pre class="joplin-source" style="overflow-x: hidden;"');
 				// result.html = result.html.split().join();
 				reg.logger().info('TinyMce::loadContent result:', JSON.stringify(result));
 				if (cancelled) return;
