@@ -412,7 +412,11 @@ export default function(theme: any, options: Options = null) {
 		/* To make code blocks horizontally scrollable */
 		/* https://github.com/laurent22/joplin/issues/5740 */
 		pre.hljs {
-			overflow-x: auto;
+			overflow-x: hidden;
+		}
+
+		code {
+			overflow-x: hidden;
 		}
 
 		/* =============================================== */
