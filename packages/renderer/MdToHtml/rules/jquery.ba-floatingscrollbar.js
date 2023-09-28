@@ -137,5 +137,5 @@
   })(jQuery);
 
   $(function () {
-    $('.sh .highlight, .sample, .joplin-editable, .joplin-table-div').floatingScrollbar();
+    $('.joplin-table-div').floatingScrollbar();
   });
