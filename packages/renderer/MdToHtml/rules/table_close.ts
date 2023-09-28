@@ -5,11 +5,6 @@ export default {
 		markdownIt.renderer.rules.table_close = function(tokens: any[], idx: number, options: any, env: any, self: any) {
 			const cur = String(self.renderToken(tokens, idx, options));
 			return `${cur}</div>\n`;
-			// if (precedentRule) {
-			// 	return precedentRule(tokens, idx, options, env, self);
-			// } else {
-			// 	return self.renderToken(tokens, idx, options);
-			// }
 		};
 	},
 };

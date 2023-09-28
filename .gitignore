@@ -51,6 +51,7 @@ lerna-debug.log
 .env
 docs/**/*.mustache
 .idea
+packages/app-mobile/pluginAssets/table_open/
 
 
 # Yarn stuff
