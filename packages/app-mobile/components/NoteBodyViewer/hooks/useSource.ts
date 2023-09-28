@@ -228,6 +228,8 @@ export default function useSource(noteBody: string, noteMarkupLanguage: number, 
 
 			setHtml(html);
 			setInjectedJs(js);
+			logger.info('useSource html:', html);
+			logger.info('useSource js:', js);
 		}
 
 		// When mounted, we need to render the webview in two stages;

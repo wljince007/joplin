@@ -1,5 +1,5 @@
 module.exports = {
-hash:"edb511738c14143467cc859e46bd6121", files: {
+hash:"d9447d3cd608f226b7572b28511e487b", files: {
 'highlight.js/atom-one-dark-reasonable.css': { data: require('./highlight.js/atom-one-dark-reasonable.css.base64.js'), mime: 'text/css', encoding: 'base64' },
 'highlight.js/atom-one-light.css': { data: require('./highlight.js/atom-one-light.css.base64.js'), mime: 'text/css', encoding: 'base64' },
 'katex/fonts/KaTeX_AMS-Regular.woff2': { data: require('./katex/fonts/KaTeX_AMS-Regular.woff2.base64.js'), mime: 'application/octet-stream', encoding: 'base64' },
@@ -25,5 +25,7 @@ hash:"edb511738c14143467cc859e46bd6121", files: {
 'katex/katex.css': { data: require('./katex/katex.css.base64.js'), mime: 'text/css', encoding: 'base64' },
 'mermaid/mermaid.min.js': { data: require('./mermaid/mermaid.min.js.base64.js'), mime: 'application/javascript', encoding: 'base64' },
 'mermaid/mermaid_render.js': { data: require('./mermaid/mermaid_render.js.base64.js'), mime: 'application/javascript', encoding: 'base64' },
+'table_open/jquery-3.7.1.min.js': { data: require('./table_open/jquery-3.7.1.min.js.base64.js'), mime: 'application/javascript', encoding: 'base64' },
+'table_open/jquery.ba-floatingscrollbar.js': { data: require('./table_open/jquery.ba-floatingscrollbar.js.base64.js'), mime: 'application/javascript', encoding: 'base64' },
 }
 };

@@ -237,7 +237,7 @@ export default function(theme: any, options: Options = null) {
 		}
 
 		.joplin-table-div{
-			overflow-x: scroll;
+			overflow-x: overlay;
 		}
 
 		.jop-tinymce table,
@@ -337,9 +337,11 @@ export default function(theme: any, options: Options = null) {
 			padding: 1em;
 		}
 
+		/*
 		.joplin-editable {
 			overflow-x: hidden;
 		}
+		*/
 
 		.joplin-editable .joplin-source {
 			display: none;

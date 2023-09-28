@@ -59,8 +59,6 @@ interface RendererPlugins {
 
 // /!\/!\ Note: the order of rules is important!! /!\/!\
 const rules: RendererRules = {
-	table_open: require('./MdToHtml/rules/table_open').default,
-	table_close: require('./MdToHtml/rules/table_close').default,
 	fence: require('./MdToHtml/rules/fence').default,
 	sanitize_html: require('./MdToHtml/rules/sanitize_html').default,
 	image: require('./MdToHtml/rules/image').default,
@@ -73,6 +71,8 @@ const rules: RendererRules = {
 	code_inline: require('./MdToHtml/rules/code_inline').default,
 	fountain: require('./MdToHtml/rules/fountain').default,
 	mermaid: require('./MdToHtml/rules/mermaid').default,
+	table_open: require('./MdToHtml/rules/table_open').default,
+	table_close: require('./MdToHtml/rules/table_close').default,
 	source_map: require('./MdToHtml/rules/source_map').default,
 };
 
