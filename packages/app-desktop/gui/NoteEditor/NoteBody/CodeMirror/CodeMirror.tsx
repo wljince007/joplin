@@ -654,7 +654,7 @@ function CodeMirror(props: NoteBodyEditorProps, ref: any) {
 			// result.html = result.html.split('<div class="joplin-editable"').join('<div class="joplin-editable" style="overflow-x: hidden;"');
 			// result.html = result.html.split('<pre class="joplin-source"').join('<pre class="joplin-source" style="overflow-x: hidden;"');
 			// result.html = result.html.split().join();
-			reg.logger().info('CodeMirror::loadContent result:', JSON.stringify(result));
+			// reg.logger().info('CodeMirror::loadContent result:', JSON.stringify(result));
 
 			if (cancelled) return;
 

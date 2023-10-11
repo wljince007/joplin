@@ -1,4 +1,4 @@
-import Logger from '@joplin/utils/Logger';
+// import Logger from '@joplin/utils/Logger';
 import InMemoryCache from './InMemoryCache';
 import noteStyle from './noteStyle';
 import { fileExtension } from './pathUtils';
@@ -13,7 +13,7 @@ const Entities = require('html-entities').AllHtmlEntities;
 const htmlentities = new Entities().encode;
 const MarkdownIt = require('markdown-it');
 const md5 = require('md5');
-const logger = Logger.create('MdToHtml');
+// const logger = Logger.create('MdToHtml');
 
 export interface RenderOptions {
 	contentMaxWidth?: number;
@@ -373,7 +373,7 @@ export default class MdToHtml {
 
 		const processedAssets = this.processPluginAssets(assets);
 		const stylearr = noteStyle(theme, noteStyleOptions);
-		logger.info('MdToHtml::allAssets stylearr:', JSON.stringify(stylearr));
+		// logger.info('MdToHtml::allAssets stylearr:', JSON.stringify(stylearr));
 		processedAssets.cssStrings.splice(0, 0, stylearr.join('\n'));
 		if (this.customCss_) processedAssets.cssStrings.push(this.customCss_);
 		const output = await this.outputAssetsToExternalAssets_(processedAssets);
@@ -606,7 +606,7 @@ export default class MdToHtml {
 				output.html = `<div id="rendered-md">${renderedBody}</div>`;
 			}
 		}
-		logger.info('MdToHtml::render cssStrings:', JSON.stringify(cssStrings));
+		// logger.info('MdToHtml::render cssStrings:', JSON.stringify(cssStrings));
 
 		if (options.externalAssetsOnly) output = await this.outputAssetsToExternalAssets_(output);
 

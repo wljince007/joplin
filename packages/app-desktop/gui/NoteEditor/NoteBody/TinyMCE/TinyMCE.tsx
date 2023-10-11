@@ -518,7 +518,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 			background-color: ${theme.backgroundColor3} !important;
 		}
 	`;
-		reg.logger().info('TinyMce: createTextNode data:', data);
+		// reg.logger().info('TinyMce: createTextNode data:', data);
 		element.appendChild(document.createTextNode(data));
 
 		return () => {
@@ -868,7 +868,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 				// result.html = result.html.split('<div class="joplin-editable"').join('<div class="joplin-editable" style="overflow-x: hidden;"');
 				// result.html = result.html.split('<pre class="joplin-source"').join('<pre class="joplin-source" style="overflow-x: hidden;"');
 				// result.html = result.html.split().join();
-				reg.logger().info('TinyMce::loadContent result:', JSON.stringify(result));
+				// reg.logger().info('TinyMce::loadContent result:', JSON.stringify(result));
 				if (cancelled) return;
 
 				editor.setContent(awfulBrHack(result.html));

@@ -133,7 +133,7 @@ export default function useSource(noteBody: string, noteMarkupLanguage: number, 
 			// result.html = result.html.split('<div class="joplin-editable"').join('<div class="joplin-editable" style="overflow-x: hidden;"');
 			// result.html = result.html.split('<pre class="joplin-source"').join('<pre class="joplin-source" style="overflow-x: hidden;"');
 			// result.html = result.html.split().join();
-			logger.info('useSource::loadContent result:', JSON.stringify(result));
+			// logger.info('useSource::loadContent result:', JSON.stringify(result));
 
 			if (cancelled) return;
 
@@ -228,8 +228,8 @@ export default function useSource(noteBody: string, noteMarkupLanguage: number, 
 
 			setHtml(html);
 			setInjectedJs(js);
-			logger.info('useSource html:', html);
-			logger.info('useSource js:', js);
+			// logger.info('useSource html:', html);
+			// logger.info('useSource js:', js);
 		}
 
 		// When mounted, we need to render the webview in two stages;
