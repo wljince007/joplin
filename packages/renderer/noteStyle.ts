@@ -419,6 +419,7 @@ export default function(theme: any, options: Options = null) {
 
 		code {
 			overflow-x: hidden;
+			white-space: pre-wrap;
 		}
 
 		/* =============================================== */
