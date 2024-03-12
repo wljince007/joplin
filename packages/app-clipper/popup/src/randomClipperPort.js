@@ -13,7 +13,8 @@ function randomClipperPort(state, env) {
 function startPort(env) {
 	const startPorts = {
 		prod: 41184,
-		dev: 27583,
+		// dev: 27583,
+		dev: 41184,
 	};
 
 	return env === 'prod' ? startPorts.prod : startPorts.dev;

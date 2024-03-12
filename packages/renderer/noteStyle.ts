@@ -43,6 +43,7 @@ export default function(theme: any, options: Options = null) {
 			font-size: ${formatCssSize(theme.noteViewerFontSize)};
 			color: ${theme.color};
 			word-wrap: break-word;
+			white-space: pre-wrap;
 			line-height: ${theme.lineHeight};
 			background-color: ${theme.backgroundColor};
 			font-family: ${fontFamily};

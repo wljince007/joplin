@@ -87,11 +87,39 @@ async function requestNoteToNote(requestNote: any) {
 			// Parsing will not work if the HTML is not wrapped in a top level tag, which is not guaranteed
 			// when getting the content from elsewhere. So here wrap it - it won't change anything to the final
 			// rendering but it makes sure everything will be parsed.
-			output.body = await htmlToMdParser().parse(`<div>${requestNote.body_html}</div>`, {
+			let spanReplace = requestNote.body_html.replace(/\r?\n/g, '\n');
+			spanReplace = spanReplace.replace(/\r\n/g, '\n');
+			spanReplace = spanReplace.replace(/\r/g, '\n');
+			spanReplace = spanReplace.replace(/<\/span>\n/g, '</span>____split_and___replace_forcsdn___\n');
+			output.body = await htmlToMdParser().parse(`<div>${spanReplace}</div>`, {
 				baseUrl: baseUrl,
 				anchorNames: requestNote.anchor_names ? requestNote.anchor_names : [],
 				convertEmbeddedPdfsToLinks: true,
 			});
+			const lines: string[] = output.body.split('\n');
+			for (const key in lines) {
+				if (!lines[key].startsWith('```') && lines[key].startsWith('`') && lines[key].endsWith('`')) {
+					lines[key] = lines[key].replace(/`/g, '');
+				}
+			}
+			output.body = lines.join('\n');
+			while (true) {
+				let bodytemp = output.body;
+				bodytemp = bodytemp.replace(/\r\n/g, '\n');
+				bodytemp = bodytemp.replace(/\r/g, '\n');
+				bodytemp = bodytemp.replace(/\n-\s+\d+\s*\n/g, '\n');
+				bodytemp = bodytemp.replace(/\n-\s+\d+\.\s*\n/g, '\n');
+				bodytemp = bodytemp.replace(/\\_/g, '_');
+				bodytemp = bodytemp.replace(/\\-/g, '-');
+				bodytemp = bodytemp.replace(/\\\[/g, '[');
+				bodytemp = bodytemp.replace(/\\\]/g, ']');
+				bodytemp = bodytemp.replace(/\\#/g, '#');
+				bodytemp = bodytemp.replace(/____split_and___replace_forcsdn___/g, '\n');
+				if (bodytemp === output.body) {
+					break;
+				}
+				output.body = bodytemp;
+			}
 			output.markup_language = MarkupToHtml.MARKUP_LANGUAGE_MARKDOWN;
 		}
 	}
