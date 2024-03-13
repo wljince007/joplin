@@ -114,7 +114,7 @@ async function requestNoteToNote(requestNote: any) {
 				bodytemp = bodytemp.replace(/\\\[/g, '[');
 				bodytemp = bodytemp.replace(/\\\]/g, ']');
 				bodytemp = bodytemp.replace(/\\#/g, '#');
-				bodytemp = bodytemp.replace(/\n+```/g, '');
+				bodytemp = bodytemp.replace(/\n+```/g, '\n```');
 				bodytemp = bodytemp.replace(/____split_and___replace_forcsdn___/g, '\n');
 				if (bodytemp === output.body) {
 					break;
