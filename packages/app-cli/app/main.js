@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env -S NODE_OPTIONS=--no-deprecation node
 
 // Use njstrace to find out what Node.js might be spending time on
 // var njstrace = require('njstrace').inject();
@@ -26,7 +26,7 @@ const sharp = require('sharp');
 const { shimInit } = require('@joplin/lib/shim-init-node.js');
 const shim = require('@joplin/lib/shim').default;
 const { _ } = require('@joplin/lib/locale');
-const { FileApiDriverLocal } = require('@joplin/lib/file-api-driver-local');
+const FileApiDriverLocal = require('@joplin/lib/file-api-driver-local').default;
 const EncryptionService = require('@joplin/lib/services/e2ee/EncryptionService').default;
 const envFromArgs = require('@joplin/lib/envFromArgs');
 const nodeSqlite = require('sqlite3');

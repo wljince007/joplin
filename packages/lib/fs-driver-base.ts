@@ -2,6 +2,7 @@ import time from './time';
 import Setting from './models/Setting';
 import { filename, fileExtension } from './path-utils';
 const md5 = require('md5');
+import resolvePathWithinDir from './utils/resolvePathWithinDir';
 import { Buffer } from 'buffer';
 
 export interface Stat {
@@ -15,6 +16,11 @@ export interface Stat {
 export interface ReadDirStatsOptions {
 	recursive: boolean;
 }
+
+export interface RemoveOptions {
+	recursive?: boolean;
+}
+
 
 export default class FsDriverBase {
 
@@ -63,6 +69,16 @@ export default class FsDriverBase {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
+	public async readFileChunkAsBuffer(handle: any, length: number): Promise<Buffer> {
+		const chunk = await this.readFileChunk(handle, length, 'base64');
+		if (chunk) {
+			return Buffer.from(chunk, 'base64');
+		} else {
+			return null;
+		}
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public async open(_path: string, _mode: any): Promise<any> {
 		throw new Error('Not implemented: open');
 	}
@@ -70,6 +86,11 @@ export default class FsDriverBase {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public async close(_handle: any): Promise<any> {
 		throw new Error('Not implemented: close');
+	}
+
+	// Like .readFile, but returns a File object.
+	public async fileAtPath(_path: string): Promise<File> {
+		throw new Error('Not implemented: fileAtPath');
 	}
 
 	public async readDirStats(_path: string, _options: ReadDirStatsOptions = null): Promise<Stat[]> {
@@ -80,8 +101,12 @@ export default class FsDriverBase {
 		throw new Error('Not implemented: exists');
 	}
 
-	public async remove(_path: string): Promise<void> {
+	public async remove(_path: string, _options: RemoveOptions = null): Promise<void> {
 		throw new Error('Not implemented: remove');
+	}
+
+	public async setTimestamp(_path: string, _timestampDate: Date): Promise<void> {
+		throw new Error('Not implemented: setTimestamp');
 	}
 
 	public async isDirectory(path: string) {
@@ -105,14 +130,21 @@ export default class FsDriverBase {
 	// also checks that the absolute path is within baseDir, to avoid security issues.
 	// It is expected that baseDir is a safe path (not user-provided).
 	public resolveRelativePathWithinDir(baseDir: string, relativePath: string) {
-		const resolvedBaseDir = this.resolve(baseDir);
-		const resolvedPath = this.resolve(baseDir, relativePath);
-		if (resolvedPath.indexOf(resolvedBaseDir) !== 0) throw new Error(`Resolved path for relative path "${relativePath}" is not within base directory "${baseDir}" (Was resolved to ${resolvedPath})`);
+		const resolvedPath = resolvePathWithinDir(baseDir, relativePath);
+		if (!resolvedPath) throw new Error(`Resolved path for relative path "${relativePath}" is not within base directory "${baseDir}" (Was resolved to ${resolvedPath})`);
 		return resolvedPath;
 	}
 
 	public getExternalDirectoryPath(): Promise<string | undefined> {
 		throw new Error('Not implemented: getExternalDirectoryPath');
+	}
+
+	public getCacheDirectoryPath(): string {
+		throw new Error('Not implemented: getCacheDirectoryPath');
+	}
+
+	public getAppDirectoryPath(): string {
+		throw new Error('Not implemented: getCacheDirectoryPath');
 	}
 
 	public isUsingAndroidSAF() {
@@ -148,13 +180,21 @@ export default class FsDriverBase {
 		}
 		let counter = 1;
 
+		// On Windows, ./FiLe.md and ./file.md are equivalent file paths.
+		// As such, to avoid overwriting reserved names, comparisons need to be
+		// case-insensitive.
+		reservedNames = reservedNames.map(name => name.toLowerCase());
+		const isReserved = (testName: string) => {
+			return reservedNames.includes(testName.toLowerCase());
+		};
+
 		const nameNoExt = filename(name, true);
 		let extension = fileExtension(name);
 		if (extension) extension = `.${extension}`;
 		let nameToTry = nameNoExt + extension;
 		while (true) {
 			// Check if the filename does not exist in the filesystem and is not reserved
-			const exists = await this.exists(nameToTry) || reservedNames.includes(nameToTry);
+			const exists = await this.exists(nameToTry) || isReserved(nameToTry);
 			if (!exists) return nameToTry;
 			if (!markdownSafe) {
 				nameToTry = `${nameNoExt} (${counter})${extension}`;

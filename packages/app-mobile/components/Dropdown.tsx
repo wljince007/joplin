@@ -78,6 +78,17 @@ class Dropdown extends Component<DropdownProps, DropdownState> {
 	private onCloseList = () => {
 		this.setState({ listVisible: false });
 	};
+	private onListLoad = (listRef: FlatList|null) => {
+		if (!listRef) return;
+
+		for (let i = 0; i < this.props.items.length; i++) {
+			const item = this.props.items[i];
+			if (item.value === this.props.selectedValue) {
+				listRef.scrollToIndex({ index: i, animated: false });
+				break;
+			}
+		}
+	};
 
 	public render() {
 		const items = this.props.items;
@@ -115,6 +126,7 @@ class Dropdown extends Component<DropdownProps, DropdownState> {
 		const itemWrapperStyle: ViewStyle = {
 			...(this.props.itemWrapperStyle ? this.props.itemWrapperStyle : {}),
 			flex: 1,
+			flexBasis: 'auto',
 			justifyContent: 'center',
 			height: itemHeight,
 			paddingLeft: 20,
@@ -197,6 +209,7 @@ class Dropdown extends Component<DropdownProps, DropdownState> {
 						style={headerWrapperStyle}
 						disabled={this.props.disabled}
 						onPress={this.onOpenList}
+						role='button'
 					>
 						<Text ellipsizeMode="tail" numberOfLines={1} style={headerStyle}>
 							{headerLabel}
@@ -215,6 +228,7 @@ class Dropdown extends Component<DropdownProps, DropdownState> {
 					<TouchableWithoutFeedback
 						accessibilityElementsHidden={true}
 						importantForAccessibility='no-hide-descendants'
+						aria-hidden={true}
 						onPress={this.onCloseList}
 						style={backgroundCloseButtonStyle}
 					>
@@ -225,6 +239,7 @@ class Dropdown extends Component<DropdownProps, DropdownState> {
 						accessibilityRole='menu'
 						style={wrapperStyle}>
 						<FlatList
+							ref={this.onListLoad}
 							style={itemListStyle}
 							data={this.props.items}
 							renderItem={itemRenderer}

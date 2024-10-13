@@ -15,6 +15,19 @@ module.exports = {
 	'globals': {
 		'Atomics': 'readonly',
 		'SharedArrayBuffer': 'readonly',
+		'BufferEncoding': 'readonly',
+		'AsyncIterable': 'readonly',
+		'FileSystemFileHandle': 'readonly',
+		'FileSystemDirectoryHandle': 'readonly',
+		'ReadableStreamDefaultReader': 'readonly',
+		'FileSystemCreateWritableOptions': 'readonly',
+		'FileSystemHandle': 'readonly',
+		'IDBTransactionMode': 'readonly',
+
+		// ServiceWorker
+		'ExtendableEvent': 'readonly',
+		'WindowClient': 'readonly',
+		'FetchEvent': 'readonly',
 
 		// Jest variables
 		'test': 'readonly',
@@ -70,6 +83,10 @@ module.exports = {
 		'no-var': ['error'],
 		'no-new-func': ['error'],
 		'import/prefer-default-export': ['error'],
+		'prefer-promise-reject-errors': ['error', {
+			allowEmptyReject: true,
+		}],
+		'no-throw-literal': ['error'],
 
 		// This rule should not be enabled since it matters in what order
 		// imports are done, in particular in relation to the shim.setReact

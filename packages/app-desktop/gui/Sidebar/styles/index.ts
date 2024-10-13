@@ -84,30 +84,15 @@ export const StyledListItemAnchor = styled.a`
 	align-items: center;
 	user-select: none;
 	height: 100%;
+
+	/* A different background color is already used to indicate focus for sidebar list items. */
+	&:focus-visible {
+		outline: none;
+	}
 `;
 
 export const StyledShareIcon = styled.i`
 	margin-left: 8px;
-`;
-
-export const StyledExpandLink = styled.a`
-	color: ${(props: StyleProps) => props.theme.color2};
-	cursor: default;
-	opacity: 0.8;
-	text-decoration: none;
-	padding-right: 8px;
-	display: flex;
-	align-items: center;
-	width: 16px;
-	max-width: 16px;
-	min-width: 16px;
-	height: 100%;
-`;
-
-export const StyledNoteCount = styled.div`
-	color: ${(props: StyleProps) => props.theme.colorFaded2};
-	padding-left: 8px;
-	user-select: none;
 `;
 
 export const StyledSynchronizeButton = styled(Button)`

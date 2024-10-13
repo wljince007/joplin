@@ -1,20 +1,22 @@
 
 import { _ } from '@joplin/lib/locale';
-import PluginService, { PluginSettings, defaultPluginSetting } from '@joplin/lib/services/plugins/PluginService';
+import PluginService, { PluginSettings, SerializedPluginSettings, defaultPluginSetting } from '@joplin/lib/services/plugins/PluginService';
 import * as React from 'react';
 import { useCallback, useState } from 'react';
-import { Button } from 'react-native-paper';
 import pickDocument from '../../../../utils/pickDocument';
 import shim from '@joplin/lib/shim';
 import Logger from '@joplin/utils/Logger';
-import { Platform } from 'react-native';
+import { Platform, View, ViewStyle } from 'react-native';
 import { join, extname } from 'path';
 import uuid from '@joplin/lib/uuid';
 import Setting from '@joplin/lib/models/Setting';
+import TextButton, { ButtonType } from '../../../buttons/TextButton';
+import { ConfigScreenStyles } from '../configScreenStyles';
 
 interface Props {
 	updatePluginStates: (settingValue: PluginSettings)=> void;
-	pluginSettings: string;
+	pluginSettings: SerializedPluginSettings;
+	styles: ConfigScreenStyles;
 }
 
 const logger = Logger.create('PluginUploadButton');
@@ -26,21 +28,23 @@ export const canInstallPluginsFromFile = () => {
 	return shim.mobilePlatform() !== 'ios' || Setting.value('env') === 'dev';
 };
 
+const buttonStyle: ViewStyle = { flexGrow: 1 };
+
 const PluginUploadButton: React.FC<Props> = props => {
 	const [showLoadingAnimation, setShowLoadingAnimation] = useState(false);
 
 	const onInstallFromFile = useCallback(async () => {
 		const pluginService = PluginService.instance();
 
-		const pluginFiles = await pickDocument(false);
+		const pluginFiles = await pickDocument({ multiple: false });
 		if (pluginFiles.length === 0) {
 			return;
 		}
 		const selectedFile = pluginFiles[0];
 
 		const localFilePath = Platform.select({
-			android: selectedFile.uri,
 			ios: decodeURI(selectedFile.uri),
+			default: selectedFile.uri,
 		});
 		logger.info('Installing plugin from file', localFilePath);
 
@@ -69,6 +73,8 @@ const PluginUploadButton: React.FC<Props> = props => {
 			logger.info('Copying to', targetFile);
 
 			await fsDriver.copy(localFilePath, targetFile);
+			logger.debug('Copied. Now installing.');
+
 			const plugin = await pluginService.installPlugin(targetFile);
 
 			const pluginSettings = pluginService.unserializePluginSettings(props.pluginSettings);
@@ -85,13 +91,17 @@ const PluginUploadButton: React.FC<Props> = props => {
 	}, [props.pluginSettings, props.updatePluginStates]);
 
 	return (
-		<Button
-			onPress={onInstallFromFile}
-			disabled={showLoadingAnimation || !canInstallPluginsFromFile()}
-			loading={showLoadingAnimation}
-		>
-			{buttonLabel()}
-		</Button>
+		<View style={props.styles.getContainerStyle(false)}>
+			<TextButton
+				type={ButtonType.Primary}
+				onPress={onInstallFromFile}
+				style={buttonStyle}
+				disabled={showLoadingAnimation || !canInstallPluginsFromFile()}
+				loading={showLoadingAnimation}
+			>
+				{buttonLabel()}
+			</TextButton>
+		</View>
 	);
 };
 

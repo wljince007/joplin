@@ -53,6 +53,9 @@
 	"%s is not optimised for synchronising many small files so your initial synchronisation will be slow.": [
 		""
 	],
+	"%s tab opened": [
+		""
+	],
 	"%s: %d notes": [
 		"%s: %d oharrak"
 	],
@@ -125,6 +128,9 @@
 	"Accept": [
 		""
 	],
+	"Accepted invitations": [
+		""
+	],
 	"Access denied: Please check your username and password": [
 		""
 	],
@@ -132,6 +138,9 @@
 		""
 	],
 	"Account": [
+		""
+	],
+	"Account type": [
 		""
 	],
 	"Active": [
@@ -161,7 +170,13 @@
 	"All data, including notes, notebooks and tags will be permanently deleted.": [
 		""
 	],
+	"All item sync failures have been marked as \"ignored\".": [
+		""
+	],
 	"All potential ports are in use - please report the issue at %s": [
+		""
+	],
+	"Allows debugging mobile plugins. See %s for details.": [
 		""
 	],
 	"Also displays unset and hidden config variables.": [
@@ -171,6 +186,9 @@
 		""
 	],
 	"Always ask": [
+		""
+	],
+	"Always open %s files without asking.": [
 		""
 	],
 	"Always resize": [
@@ -189,6 +207,9 @@
 		""
 	],
 	"An update is available, do you want to download it now?": [
+		""
+	],
+	"Android API level: %d": [
 		""
 	],
 	"Any email sent to this address will be converted into a note and added to your collection. The note will be saved into the Inbox notebook": [
@@ -242,7 +263,7 @@
 	"Auto-add disabled accounts for deletion": [
 		""
 	],
-	"Auto-pair braces, parenthesis, quotations, etc.": [
+	"Auto-pair braces, parentheses, quotations, etc.": [
 		""
 	],
 	"Automatically check for updates": [
@@ -258,6 +279,9 @@
 		"Atzera"
 	],
 	"Basic": [
+		""
+	],
+	"Beta": [
 		""
 	],
 	"Biometric unlock is not setup on the device. Please set it up in order to unlock Joplin. If the device is on lockout, consider switching it off and on to reset biometrics scanning.": [
@@ -276,6 +300,9 @@
 		""
 	],
 	"Bulleted List": [
+		""
+	],
+	"by %s": [
 		""
 	],
 	"Can Share": [
@@ -374,6 +401,12 @@
 	"Close Window": [
 		""
 	],
+	"Cmd-click to open": [
+		""
+	],
+	"Cmd-click to open: %s": [
+		""
+	],
 	"Code": [
 		""
 	],
@@ -384,6 +417,9 @@
 		""
 	],
 	"Collapse": [
+		""
+	],
+	"Collapse %s": [
 		""
 	],
 	"Coming alarms": [
@@ -406,6 +442,12 @@
 	],
 	"Completed decryption.": [
 		"Deszifratuta."
+	],
+	"Completed with warnings:\n%s": [
+		""
+	],
+	"completion date": [
+		""
 	],
 	"Compress old changes": [
 		""
@@ -510,6 +552,12 @@
 	"Creates a new to-do.": [
 		"Zeregin berria sortu."
 	],
+	"Ctrl-click to open": [
+		""
+	],
+	"Ctrl-click to open: %s": [
+		""
+	],
 	"Current version is up-to-date.": [
 		""
 	],
@@ -538,9 +586,6 @@
 		"Iluna"
 	],
 	"Dashboard": [
-		""
-	],
-	"Database v%s": [
 		""
 	],
 	"Date": [
@@ -575,6 +620,9 @@
 	],
 	"Deleted remote items: %d.": [
 		"Urruneko itemak ezabatuta: %d."
+	],
+	"Deletes notes permanently, skipping the trash.": [
+		""
 	],
 	"Deletes the given notebook.": [
 		"Ezabatu emandako koadernoak."
@@ -858,6 +906,9 @@
 	"Expand": [
 		""
 	],
+	"Expand %s": [
+		""
+	],
 	"Export Debug Report": [
 		"Esportatu arazketa txostena"
 	],
@@ -921,9 +972,6 @@
 	"Focus title": [
 		""
 	],
-	"Folders": [
-		"Karpetak"
-	],
 	"For debugging purpose only: export your profile to an external SD card.": [
 		""
 	],
@@ -944,9 +992,6 @@
 	],
 	"Found: %d.": [
 		"Aurkitua: %d"
-	],
-	"From a plugin": [
-		""
 	],
 	"Full changelog": [
 		""
@@ -985,6 +1030,9 @@
 		""
 	],
 	"Heading": [
+		""
+	],
+	"Here's what we do to make plugins safer:": [
 		""
 	],
 	"Hide %s": [
@@ -1035,6 +1083,18 @@
 	"Import": [
 		"Inportatu"
 	],
+	"Import failed. Make sure a JEX file was selected.\nDetails: %s": [
+		""
+	],
+	"Import from JEX": [
+		""
+	],
+	"Import notes from a JEX (Joplin Export) file.": [
+		""
+	],
+	"Imported successfully!": [
+		""
+	],
 	"Importing from \"%s\" as \"%s\" format. Please wait...": [
 		""
 	],
@@ -1066,6 +1126,9 @@
 		""
 	],
 	"In progress": [
+		""
+	],
+	"Incompatible": [
 		""
 	],
 	"Increase indent level": [
@@ -1120,6 +1183,9 @@
 		""
 	],
 	"Joplin can synchronise your notes using various providers. Select one from the list below.": [
+		""
+	],
+	"Joplin doesn't recognise the %s extension. Opening this file could be dangerous. What would you like to do?": [
 		""
 	],
 	"Joplin Export Directory": [
@@ -1182,6 +1248,9 @@
 	"Layout button sequence": [
 		""
 	],
+	"Learn more": [
+		""
+	],
 	"Leave it blank to download the language files from the default website": [
 		""
 	],
@@ -1193,6 +1262,9 @@
 	],
 	"Light": [
 		"Argia"
+	],
+	"Like any software you install, plugins can potentially cause security issues or data loss.": [
+		""
 	],
 	"Lines": [
 		""
@@ -1214,9 +1286,6 @@
 		""
 	],
 	"Loaded": [
-		""
-	],
-	"Loading plugin repository...": [
 		""
 	],
 	"Location": [
@@ -1285,6 +1354,9 @@
 	"More than one item match \"%s\". Please narrow down your query.": [
 		"Elementu bat baino gehiago bat dator \"%s\" bilaketarekin. Mugatu zure bilaketa, mesedez."
 	],
+	"Most plugins have source code available for review on the plugin website.": [
+		""
+	],
 	"Move %d notes to notebook \"%s\"?": [
 		"Mugitu %d oharrak \"%s\" koadernora?"
 	],
@@ -1295,6 +1367,12 @@
 		"E"
 	],
 	"Never resize": [
+		""
+	],
+	"New": [
+		""
+	],
+	"New invitations": [
 		""
 	],
 	"New note": [
@@ -1333,6 +1411,9 @@
 	"No item with ID %s": [
 		""
 	],
+	"No new invitations": [
+		""
+	],
 	"No notebook has been specified.": [
 		"Ez dago koadernorik aukeratuta."
 	],
@@ -1341,6 +1422,9 @@
 	],
 	"No notes in here. Create one by clicking on \"New note\".": [
 		"Hemen ez dago oharrik. Sortu bat \"Ohar berria\" sakatuta."
+	],
+	"No plugins are installed.": [
+		""
 	],
 	"No resources!": [
 		""
@@ -1501,7 +1585,7 @@
 	"Please specify import format for %s": [
 		""
 	],
-	"Please upgrade Joplin to use this plugin": [
+	"Please upgrade Joplin to version %s or later to use this plugin.": [
 		""
 	],
 	"Please wait for all attachments to be downloaded and decrypted. You may also switch to %s to edit the note.": [
@@ -1510,16 +1594,28 @@
 	"Plugin message": [
 		""
 	],
+	"Plugin panels": [
+		""
+	],
 	"Plugin repository failed to load": [
 		""
 	],
 	"Plugin search": [
 		""
 	],
+	"Plugin security": [
+		""
+	],
 	"Plugin tools": [
 		""
 	],
+	"Plugin WebView debugging": [
+		""
+	],
 	"Plugins": [
+		""
+	],
+	"Plugins extend Joplin with features that are not present by default. Plugins can extend Joplin's editor, viewer, and more.": [
 		""
 	],
 	"Portrait": [
@@ -1582,6 +1678,9 @@
 	"Process user deletions": [
 		""
 	],
+	"Processing": [
+		""
+	],
 	"Profile": [
 		""
 	],
@@ -1633,6 +1732,9 @@
 	"Recommended": [
 		""
 	],
+	"Recommended plugins": [
+		""
+	],
 	"Redo": [
 		""
 	],
@@ -1666,6 +1768,15 @@
 	"Replace: ": [
 		""
 	],
+	"Report an issue": [
+		""
+	],
+	"Report any issues concerning the plugin.": [
+		""
+	],
+	"Report fraudulent plugin": [
+		""
+	],
 	"Resize large images:": [
 		""
 	],
@@ -1679,6 +1790,9 @@
 		""
 	],
 	"Restore": [
+		""
+	],
+	"Results (%d):": [
 		""
 	],
 	"Retry": [
@@ -1780,6 +1894,9 @@
 	"Show all": [
 		""
 	],
+	"Show monospace fonts only.": [
+		""
+	],
 	"Show note counts": [
 		""
 	],
@@ -1839,6 +1956,9 @@
 	],
 	"Source": [
 		"Iturburua"
+	],
+	"Spacer": [
+		""
 	],
 	"Specify the port that should be used by the API server. If not set, a default will be used.": [
 		""
@@ -1972,6 +2092,9 @@
 	"Tags": [
 		"Etiketak"
 	],
+	"Task \"%s\" failed with error: %s": [
+		""
+	],
 	"Tasks": [
 		""
 	],
@@ -2100,11 +2223,11 @@
 	"There are currently no notes. Create one by clicking on the (+) button.": [
 		"Ez dago oharrik. Sortu bat (+) botoian klik eginaz."
 	],
-	"There are unsaved changes.": [
+	"There are no notes in the trash folder.": [
 		""
 	],
-	"There is currently no notebook. Create one by clicking on \"New notebook\".": [
-		"Momentuz ez dago koadernorik. Sortu bat \"Koaderno berria\" sakatuta."
+	"There are unsaved changes.": [
+		""
 	],
 	"There is no data to export.": [
 		""
@@ -2115,6 +2238,9 @@
 	"There was an error downloading this attachment:": [
 		""
 	],
+	"These items failed to sync, but have been marked as \"ignored\". They won't cause the sync warning to appear, but still aren't synced. To unignore, click \"retry\".": [
+		""
+	],
 	"These items will remain on the device but will not be uploaded to the sync target. In order to find these items, either search for the title or the ID (which is displayed in brackets above).": [
 		"Itemok gailuan geratuko dira baina ez dira sinkronizatuko. Horiek aurkitzeko bilaketak egin titulu edo goiko parentesien arteko IDaren arabera."
 	],
@@ -2122,6 +2248,9 @@
 		""
 	],
 	"This allows another user to share a notebook with you, and you can then both collaborate on it. It does not however allow you to share a notebook with someone else, unless you have the feature \"%s\".": [
+		""
+	],
+	"This attachment does not have OCR data (Status: %s)": [
 		""
 	],
 	"This attachment is not downloaded or not decrypted yet": [
@@ -2148,10 +2277,16 @@
 	"This note has no content. Click on \"%s\" to toggle the editor and edit the note.": [
 		""
 	],
+	"This plugin doesn't support %s.": [
+		""
+	],
 	"This Rich Text editor has a number of limitations and it is recommended to be aware of them before using it.": [
 		""
 	],
 	"This service allows the browser extension to communicate with Joplin. When enabling it your firewall may ask you to give permission to Joplin to listen to a particular port.": [
+		""
+	],
+	"This subfolder of the trash has no notes.": [
 		""
 	],
 	"This will allow Joplin to run in the background. It is recommended to enable this setting so that your notes are constantly being synchronised, thus reducing the number of conflicts.": [
@@ -2239,9 +2374,6 @@
 		"Idatz: %s."
 	],
 	"Unable to edit resource of type %s": [
-		""
-	],
-	"Unable to export or share data. Reason: %s": [
 		""
 	],
 	"Unable to share log data. Reason: %s": [
@@ -2337,6 +2469,9 @@
 	"View": [
 		""
 	],
+	"View OCR text": [
+		""
+	],
 	"View on map": [
 		"Ikusi mapan"
 	],
@@ -2361,7 +2496,10 @@
 	"Warning: not all resources shown for performance reasons (limit: %s).": [
 		""
 	],
-	"Warnings:\n%s": [
+	"We have a system for reporting and removing problematic plugins.": [
+		""
+	],
+	"We mark plugins developed by trusted Joplin community members as \"recommended\".": [
 		""
 	],
 	"Web Clipper": [
@@ -2369,6 +2507,9 @@
 	],
 	"Website and documentation": [
 		"Web orria eta dokumentazioa (en)"
+	],
+	"WebView package: %s": [
+		""
 	],
 	"Welcome to Joplin!\n\nType `:help shortcuts` for the list of keyboard shortcuts, or just `:help` for usage information.\n\nFor example, to create a notebook press `mb`; to create a note press `mn`.": [
 		"Ongi etorri Joplin-era!\n\nIdatz `:help shortcuts` lasterbideak ikusteko, edo soilik `:help`erabilerako informaziorako.\n\nEsate baterako, koadernoa sortzeko sakatu `mb`: oharra sortzeko sakatu `mn`"
@@ -2409,10 +2550,16 @@
 	"You were unable to connect to Joplin Cloud. Please check your credentials and try again. Error:": [
 		""
 	],
+	"Your account doesn't have access to this feature": [
+		""
+	],
 	"Your choice: ": [
 		"Zure aukera:"
 	],
 	"Your data is going to be re-encrypted and synced again.": [
+		""
+	],
+	"Your Joplin Cloud credentials are invalid, please login.": [
 		""
 	],
 	"Your password is needed to decrypt some of your data.": [

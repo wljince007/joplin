@@ -24,11 +24,13 @@ const { isImageMimeType } = require('../resourceUtils');
 const { MarkupToHtml } = require('@joplin/renderer');
 const { ALL_NOTES_FILTER_ID } = require('../reserved-ids');
 
+export interface PreviewsOrder {
+	by: string;
+	dir: string;
+}
+
 interface PreviewsOptions {
-	order?: {
-		by: string;
-		dir: string;
-	}[];
+	order?: PreviewsOrder[];
 	conditions?: string[];
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	conditionsParams?: any[];
@@ -624,7 +626,7 @@ export default class Note extends BaseItem {
 		});
 	}
 
-	public static async moveToFolder(noteId: string, folderId: string) {
+	public static async moveToFolder(noteId: string, folderId: string, saveOptions: SaveOptions|null = null) {
 		if (folderId === this.getClass('Folder').conflictFolderId()) throw new Error(_('Cannot move note to "%s" notebook', this.getClass('Folder').conflictFolderTitle()));
 
 		// When moving a note to a different folder, the user timestamp is not
@@ -643,7 +645,7 @@ export default class Note extends BaseItem {
 			updated_time: time.unixMs(),
 		};
 
-		return Note.save(modifiedNote, { autoTimestamp: false });
+		return Note.save(modifiedNote, { autoTimestamp: false, ...saveOptions });
 	}
 
 	public static changeNoteType(note: NoteEntity, type: string) {
@@ -841,6 +843,7 @@ export default class Note extends BaseItem {
 				provisional: isProvisional,
 				ignoreProvisionalFlag: ignoreProvisionalFlag,
 				changedFields: changedFields,
+				...options?.dispatchOptions,
 			});
 		}
 
@@ -895,7 +898,7 @@ export default class Note extends BaseItem {
 				const sql = `
 					UPDATE notes
 					SET	${updateSql.join(', ')}						
-					WHERE id IN ("${processIds.join('","')}")
+					WHERE id IN ('${processIds.join('\',\'')}')
 				`;
 
 				await this.db().exec({ sql, params });
@@ -915,6 +918,7 @@ export default class Note extends BaseItem {
 				this.dispatch({
 					type: 'NOTE_DELETE',
 					id: id,
+					originalItem: notes[i],
 				});
 			}
 		}

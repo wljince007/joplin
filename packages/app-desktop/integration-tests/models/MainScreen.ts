@@ -1,22 +1,31 @@
 import { Page, Locator, ElectronApplication } from '@playwright/test';
 import NoteEditorScreen from './NoteEditorScreen';
 import activateMainMenuItem from '../util/activateMainMenuItem';
+import Sidebar from './Sidebar';
+import GoToAnything from './GoToAnything';
+import setFilePickerResponse from '../util/setFilePickerResponse';
+import NoteList from './NoteList';
 
 export default class MainScreen {
 	public readonly newNoteButton: Locator;
-	public readonly noteListContainer: Locator;
+	public readonly noteList: NoteList;
+	public readonly sidebar: Sidebar;
+	public readonly dialog: Locator;
 	public readonly noteEditor: NoteEditorScreen;
+	public readonly goToAnything: GoToAnything;
 
 	public constructor(private page: Page) {
 		this.newNoteButton = page.locator('.new-note-button');
-		this.noteListContainer = page.locator('.rli-noteList');
+		this.noteList = new NoteList(page);
+		this.sidebar = new Sidebar(page, this);
+		this.dialog = page.locator('.dialog-modal-layer');
 		this.noteEditor = new NoteEditorScreen(page);
+		this.goToAnything = new GoToAnything(page, this);
 	}
 
 	public async waitFor() {
 		await this.newNoteButton.waitFor();
-		await this.noteEditor.waitFor();
-		await this.noteListContainer.waitFor();
+		await this.noteList.waitFor();
 	}
 
 	// Follows the steps a user would use to create a new note.
@@ -37,11 +46,16 @@ export default class MainScreen {
 
 	public async openSettings(electronApp: ElectronApplication) {
 		// Check both labels so this works on MacOS
-		const openedWithPreferences = await activateMainMenuItem(electronApp, 'Preferences...');
-		const openedWithOptions = await activateMainMenuItem(electronApp, 'Options');
+		await activateMainMenuItem(electronApp, /^(Preferences\.\.\.|Options)$/);
+	}
 
-		if (!openedWithOptions && !openedWithPreferences) {
-			throw new Error('Unable to find settings menu item in application menus.');
-		}
+	public async search(text: string) {
+		const searchBar = this.page.getByPlaceholder('Search...');
+		await searchBar.fill(text);
+	}
+
+	public async importHtmlDirectory(electronApp: ElectronApplication, path: string) {
+		await setFilePickerResponse(electronApp, [path]);
+		await activateMainMenuItem(electronApp, 'HTML - HTML document (Directory)', 'Import');
 	}
 }

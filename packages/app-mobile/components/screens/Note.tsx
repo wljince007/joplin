@@ -6,29 +6,27 @@ import UndoRedoService from '@joplin/lib/services/UndoRedoService';
 import NoteBodyViewer from '../NoteBodyViewer/NoteBodyViewer';
 import checkPermissions from '../../utils/checkPermissions';
 import NoteEditor from '../NoteEditor/NoteEditor';
-import { Size } from '@joplin/utils/types';
-const FileViewer = require('react-native-file-viewer').default;
-const React = require('react');
-import { Keyboard, View, TextInput, StyleSheet, Linking, Image, Share, NativeSyntheticEvent } from 'react-native';
+import * as React from 'react';
+import { Keyboard, View, TextInput, StyleSheet, Linking, Share, NativeSyntheticEvent } from 'react-native';
 import { Platform, PermissionsAndroid } from 'react-native';
-const { connect } = require('react-redux');
+import { connect } from 'react-redux';
 // const { MarkdownEditor } = require('@joplin/lib/../MarkdownEditor/index.js');
 import Note from '@joplin/lib/models/Note';
 import BaseItem from '@joplin/lib/models/BaseItem';
 import Resource from '@joplin/lib/models/Resource';
 import Folder from '@joplin/lib/models/Folder';
-const Clipboard = require('@react-native-community/clipboard').default;
+const Clipboard = require('@react-native-clipboard/clipboard').default;
 const md5 = require('md5');
-const { BackButtonService } = require('../../services/back-button.js');
+import BackButtonService from '../../services/BackButtonService';
 import NavService, { OnNavigateCallback as OnNavigateCallback } from '@joplin/lib/services/NavService';
-import BaseModel, { ModelType } from '@joplin/lib/BaseModel';
-import ActionButton from '../ActionButton';
+import { ModelType } from '@joplin/lib/BaseModel';
+import FloatingActionButton from '../buttons/FloatingActionButton';
 const { fileExtension, safeFileExtension } = require('@joplin/lib/path-utils');
-const mimeUtils = require('@joplin/lib/mime-utils.js').mime;
+import * as mimeUtils from '@joplin/lib/mime-utils';
 import ScreenHeader, { MenuOptionType } from '../ScreenHeader';
 import NoteTagsDialog from './NoteTagsDialog';
 import time from '@joplin/lib/time';
-const { Checkbox } = require('../checkbox.js');
+import Checkbox from '../Checkbox';
 import { _, currentLocale } from '@joplin/lib/locale';
 import { reg } from '@joplin/lib/registry';
 import ResourceFetcher from '@joplin/lib/services/ResourceFetcher';
@@ -36,8 +34,7 @@ import { BaseScreenComponent } from '../base-screen';
 import { themeStyle, editorFont } from '../global-style';
 const { dialogs } = require('../../utils/dialogs.js');
 const DialogBox = require('react-native-dialogbox').default;
-import ImageResizer from '@bam.tech/react-native-image-resizer';
-import shared, { BaseNoteScreenComponent } from '@joplin/lib/components/shared/note-screen-shared';
+import shared, { BaseNoteScreenComponent, Props as BaseProps } from '@joplin/lib/components/shared/note-screen-shared';
 import { Asset, ImagePickerResponse, launchImageLibrary } from 'react-native-image-picker';
 import SelectDateTimeDialog from '../SelectDateTimeDialog';
 import ShareExtension from '../../utils/ShareExtension.js';
@@ -49,27 +46,31 @@ import promptRestoreAutosave from '../NoteEditor/ImageEditor/promptRestoreAutosa
 import isEditableResource from '../NoteEditor/ImageEditor/isEditableResource';
 import VoiceTypingDialog from '../voiceTyping/VoiceTypingDialog';
 import { voskEnabled } from '../../services/voiceTyping/vosk';
-import { isSupportedLanguage } from '../../services/voiceTyping/vosk.android';
+import { isSupportedLanguage } from '../../services/voiceTyping/vosk';
 import { ChangeEvent as EditorChangeEvent, SelectionRangeChangeEvent, UndoRedoDepthChangeEvent } from '@joplin/editor/events';
 import { join } from 'path';
 import { Dispatch } from 'redux';
 import { RefObject } from 'react';
 import { SelectionRange } from '../NoteEditor/types';
+import { getNoteCallbackUrl } from '@joplin/lib/callbackUrlUtils';
 import { AppState } from '../../utils/types';
 import restoreItems from '@joplin/lib/services/trash/restoreItems';
 import { getDisplayParentTitle } from '@joplin/lib/services/trash';
-import { PluginStates } from '@joplin/lib/services/plugins/reducer';
+import { PluginStates, utils as pluginUtils } from '@joplin/lib/services/plugins/reducer';
 import pickDocument from '../../utils/pickDocument';
 import debounce from '../../utils/debounce';
 import { focus } from '@joplin/lib/utils/focusHandler';
-const urlUtils = require('@joplin/lib/urlUtils');
+import CommandService from '@joplin/lib/services/CommandService';
+import { ResourceInfo } from '../NoteBodyViewer/hooks/useRerenderHandler';
+import getImageDimensions from '../../utils/image/getImageDimensions';
+import resizeImage from '../../utils/image/resizeImage';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 const emptyArray: any[] = [];
 
 const logger = Logger.create('screens/Note');
 
-interface Props {
+interface Props extends BaseProps {
 	provisionalNoteIds: string[];
 	dispatch: Dispatch;
 	noteId: string;
@@ -79,8 +80,8 @@ interface Props {
 	editorFontSize: number;
 	editorFont: number; // e.g. Setting.FONT_MENLO
 	showSideMenu: boolean;
-	searchQuery: string[];
-	ftsEnabled: boolean;
+	searchQuery: string;
+	ftsEnabled: number;
 	highlightedWords: string[];
 	noteHash: string;
 	toolbarEnabled: boolean;
@@ -103,7 +104,7 @@ interface State {
 	showImageEditor: boolean;
 	imageEditorResource: ResourceEntity;
 	imageEditorResourceFilepath: string;
-	noteResources: Record<string, ResourceEntity>;
+	noteResources: Record<string, ResourceInfo>;
 	newAndNoTitleChangeNoteId: boolean|null;
 
 	HACK_webviewLoadingState: number;
@@ -121,8 +122,7 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 	// a re-render.
 	private lastBodyScroll: number|undefined = undefined;
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private saveActionQueues_: any;
+	private saveActionQueues_: Record<string, AsyncActionQueue>;
 	private doFocusUpdate_: boolean;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	private styles_: any;
@@ -191,6 +191,8 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 
 			voiceTypingDialogShown: false,
 		};
+
+		this.titleTextFieldRef = React.createRef();
 
 		this.saveActionQueues_ = {};
 
@@ -266,35 +268,7 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 
 		this.onJoplinLinkClick_ = async (msg: string) => {
 			try {
-				const resourceUrlInfo = urlUtils.parseResourceUrl(msg);
-				if (resourceUrlInfo) {
-					const itemId = resourceUrlInfo.itemId;
-					const item = await BaseItem.loadItemById(itemId);
-					if (!item) throw new Error(_('No item with ID %s', itemId));
-
-					if (item.type_ === BaseModel.TYPE_NOTE) {
-						this.props.dispatch({
-							type: 'NAV_GO',
-							routeName: 'Note',
-							noteId: item.id,
-							noteHash: resourceUrlInfo.hash,
-						});
-					} else if (item.type_ === BaseModel.TYPE_RESOURCE) {
-						if (!(await Resource.isReady(item))) throw new Error(_('This attachment is not downloaded or not decrypted yet.'));
-
-						const resourcePath = Resource.fullPath(item);
-						logger.info(`Opening resource: ${resourcePath}`);
-						await FileViewer.open(resourcePath);
-					} else {
-						throw new Error(_('The Joplin mobile app does not currently support this type of link: %s', BaseModel.modelTypeToName(item.type_)));
-					}
-				} else {
-					if (msg.indexOf('file://') === 0) {
-						throw new Error(_('Links with protocol "%s" are not supported', 'file://'));
-					} else {
-						await Linking.openURL(msg);
-					}
-				}
+				await CommandService.instance().execute('openItem', msg);
 			} catch (error) {
 				dialogs.error(this, error.message);
 			}
@@ -457,6 +431,7 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 		styles.titleContainer = {
 			flex: 0,
 			flexDirection: 'row',
+			flexBasis: 'auto',
 			paddingLeft: theme.marginLeft,
 			paddingRight: theme.marginRight,
 			borderBottomColor: theme.dividerColor,
@@ -490,6 +465,7 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 
 	public async requestGeoLocationPermissions() {
 		if (!Setting.value('trackLocation')) return;
+		if (Platform.OS === 'web') return;
 
 		const response = await checkPermissions(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION, {
 			message: _('In order to associate a geo-location with the note, the app needs your permission to access your location.\n\nYou may turn off this option at any time in the Configuration screen.'),
@@ -517,11 +493,6 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 		this.undoRedoService_ = new UndoRedoService();
 		this.undoRedoService_.on('stackChange', this.undoRedoService_stackChange);
 
-		if (this.state.note && this.state.note.body && Setting.value('sync.resourceDownloadMode') === 'auto') {
-			const resourceIds = await Note.linkedResourceIds(this.state.note.body);
-			await ResourceFetcher.instance().markForDownload(resourceIds);
-		}
-
 		// Although it is async, we don't wait for the answer so that if permission
 		// has already been granted, it doesn't slow down opening the note. If it hasn't
 		// been granted, the popup will open anyway.
@@ -533,11 +504,15 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 		void ResourceFetcher.instance().markForDownload(event.resourceId);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public componentDidUpdate(prevProps: any, prevState: any) {
+	public async markAllAttachedResourcesForDownload() {
+		const resourceIds = await Note.linkedResourceIds(this.state.note.body);
+		await ResourceFetcher.instance().markForDownload(resourceIds);
+	}
+
+	public componentDidUpdate(prevProps: Props, prevState: State) {
 		if (this.doFocusUpdate_) {
 			this.doFocusUpdate_ = false;
-			this.focusUpdate();
+			this.scheduleFocusUpdate();
 		}
 
 		if (prevProps.showSideMenu !== this.props.showSideMenu && this.props.showSideMenu) {
@@ -552,6 +527,11 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 			void promptRestoreAutosave((drawingData: string) => {
 				void this.attachNewDrawing(drawingData);
 			});
+
+			// Handle automatic resource downloading
+			if (this.state.note?.body && Setting.value('sync.resourceDownloadMode') === 'auto') {
+				void this.markAllAttachedResourcesForDownload();
+			}
 		}
 
 		// Disable opening/closing the side menu with touch gestures
@@ -571,18 +551,10 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 
 			this.props.dispatch({
 				type: 'NAV_GO',
-				routeName: 'Notes',
-				folderId: this.state.note.parent_id,
+				routeName: 'Note',
+				noteId: noteId,
+				noteHash: noteHash,
 			});
-
-			shim.setTimeout(() => {
-				this.props.dispatch({
-					type: 'NAV_GO',
-					routeName: 'Note',
-					noteId: noteId,
-					noteHash: noteHash,
-				});
-			}, 5);
 		}
 	}
 
@@ -592,7 +564,7 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 
 		shared.uninstallResourceHandling(this.refreshResource);
 
-		this.saveActionQueue(this.state.note.id).processAllNow();
+		void this.saveActionQueue(this.state.note.id).processAllNow();
 
 		// It cannot theoretically be undefined, since componentDidMount should always be called before
 		// componentWillUnmount, but with React Native the impossible often becomes possible.
@@ -659,44 +631,14 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 		await shared.saveOneProperty(this, name, value);
 	}
 
-	private async deleteNote_onPress() {
-		const note = this.state.note;
-		if (!note.id) return;
-
-		const folderId = note.parent_id;
-
-		await Note.delete(note.id, { toTrash: true, sourceDescription: 'Delete note button' });
-
-		this.props.dispatch({
-			type: 'NAV_GO',
-			routeName: 'Notes',
-			folderId: folderId,
-		});
-	}
-
 	private async pickDocuments() {
-		const result = await pickDocument(true);
+		const result = await pickDocument({ multiple: true });
 		return result;
-	}
-
-	public async imageDimensions(uri: string): Promise<Size> {
-		return new Promise((resolve, reject) => {
-			Image.getSize(
-				uri,
-				(width: number, height: number) => {
-					resolve({ width: width, height: height });
-				},
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-				(error: any) => {
-					reject(error);
-				},
-			);
-		});
 	}
 
 	public async resizeImage(localFilePath: string, targetPath: string, mimeType: string) {
 		const maxSize = Resource.IMAGE_MAX_DIMENSION;
-		const dimensions = await this.imageDimensions(localFilePath);
+		const dimensions = await getImageDimensions(localFilePath);
 		reg.logger().info('Original dimensions ', dimensions);
 
 		const saveOriginalImage = async () => {
@@ -708,30 +650,14 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 			dimensions.height = maxSize;
 			reg.logger().info('New dimensions ', dimensions);
 
-			const format = mimeType === 'image/png' ? 'PNG' : 'JPEG';
-			reg.logger().info(`Resizing image ${localFilePath}`);
-			const resizedImage = await ImageResizer.createResizedImage(
-				localFilePath,
-				dimensions.width,
-				dimensions.height,
-				format,
-				85, // quality
-				undefined, // rotation
-				undefined, // outputPath
-				true, // keep metadata
-			);
-
-			const resizedImagePath = resizedImage.uri;
-			reg.logger().info('Resized image ', resizedImagePath);
-			reg.logger().info(`Moving ${resizedImagePath} => ${targetPath}`);
-
-			await shim.fsDriver().copy(resizedImagePath, targetPath);
-
-			try {
-				await shim.fsDriver().unlink(resizedImagePath);
-			} catch (error) {
-				reg.logger().warn('Error when unlinking cached file: ', error);
-			}
+			await resizeImage({
+				inputPath: localFilePath,
+				outputPath: targetPath,
+				maxWidth: dimensions.width,
+				maxHeight: dimensions.height,
+				quality: 85,
+				format: mimeType === 'image/png' ? 'PNG' : 'JPEG',
+			});
 			return true;
 		};
 
@@ -762,8 +688,8 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 		}
 
 		const localFilePath = Platform.select({
-			android: pickerResponse.uri,
 			ios: decodeURI(pickerResponse.uri),
+			default: pickerResponse.uri,
 		});
 
 		let mimeType = pickerResponse.type;
@@ -850,7 +776,7 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 				if (this.editorRef.current) {
 					this.editorRef.current.insertText(newText);
 				} else {
-					logger.error(`Tried to attach resource ${resource.id} to the note when the editor is not visible!`);
+					logger.info(`Tried to attach resource ${resource.id} to the note when the editor is not visible -- updating the note body instead.`);
 				}
 			}
 		} else {
@@ -885,8 +811,15 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 		}
 	}
 
-	private takePhoto_onPress() {
-		this.setState({ showCamera: true });
+	private async takePhoto_onPress() {
+		if (Platform.OS === 'web') {
+			const response = await pickDocument({ multiple: true, preferCamera: true });
+			for (const asset of response) {
+				await this.attachFile(asset, 'image');
+			}
+		} else {
+			this.setState({ showCamera: true });
+		}
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -956,20 +889,12 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 	};
 
 	private drawPicture_onPress = async () => {
-		if (this.state.mode === 'edit') {
-			// Create a new empty drawing and attach it now, before the image editor is opened.
-			// With the present structure of Note.tsx, the we can't use this.editorRef while
-			// the image editor is open, and thus can't attach drawings at the cursor location.
-			const resource = await this.attachNewDrawing('');
-			await this.editDrawing(resource);
-		} else {
-			logger.info('Showing image editor...');
-			this.setState({
-				showImageEditor: true,
-				imageEditorResourceFilepath: null,
-				imageEditorResource: null,
-			});
-		}
+		logger.info('Showing image editor...');
+		this.setState({
+			showImageEditor: true,
+			imageEditorResourceFilepath: null,
+			imageEditorResource: null,
+		});
 	};
 
 	private async editDrawing(item: BaseItem) {
@@ -1030,14 +955,20 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 	}
 
 	public async onAlarmDialogAccept(date: Date) {
-		const response = await checkPermissions(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+		if (Platform.OS === 'android') {
+			const response = await checkPermissions(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
 
-		// The POST_NOTIFICATIONS permission isn't supported on Android API < 33.
-		// (If unsupported, returns NEVER_ASK_AGAIN).
-		// On earlier releases, notifications should work without this permission.
-		if (response === PermissionsAndroid.RESULTS.DENIED) {
-			logger.warn('POST_NOTIFICATIONS permission was not granted');
-			return;
+			// The POST_NOTIFICATIONS permission isn't supported on Android API < 33.
+			// (If unsupported, returns NEVER_ASK_AGAIN).
+			// On earlier releases, notifications should work without this permission.
+			if (response === PermissionsAndroid.RESULTS.DENIED) {
+				logger.warn('POST_NOTIFICATIONS permission was not granted');
+				return;
+			}
+		}
+
+		if (Platform.OS === 'web') {
+			alert('Warning: The due-date has been saved, but showing notifications is not supported by Joplin Web.');
 		}
 
 		const newNote = { ...this.state.note };
@@ -1079,6 +1010,11 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 	private copyMarkdownLink_onPress() {
 		const note = this.state.note;
 		Clipboard.setString(Note.markdownTag(note));
+	}
+
+	private copyExternalLink_onPress() {
+		const note = this.state.note;
+		Clipboard.setString(getNoteCallbackUrl(note.id));
 	}
 
 	public sideMenuOptions() {
@@ -1132,10 +1068,18 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 
 		const buttonId = await dialogs.pop(this, _('Choose an option'), buttons);
 
-		if (buttonId === 'takePhoto') this.takePhoto_onPress();
-		if (buttonId === 'attachFile') void this.attachFile_onPress();
-		if (buttonId === 'attachPhoto') void this.attachPhoto_onPress();
+		if (buttonId === 'takePhoto') await this.takePhoto_onPress();
+		if (buttonId === 'attachFile') await this.attachFile_onPress();
+		if (buttonId === 'attachPhoto') await this.attachPhoto_onPress();
 	}
+
+	public onAttach = async (filePath?: string) => {
+		if (filePath) {
+			await this.attachFile({ uri: filePath }, 'all');
+		} else {
+			await this.showAttachMenu();
+		}
+	};
 
 	// private vosk_:Vosk;
 
@@ -1207,7 +1151,9 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 		const readOnly = this.state.readOnly;
 		const isDeleted = !!this.state.note.deleted_time;
 
-		const cacheKey = md5([isTodo, isSaved].join('_'));
+		const pluginCommands = pluginUtils.commandNamesFromViews(this.props.plugins, 'noteToolbar');
+
+		const cacheKey = md5([isTodo, isSaved, pluginCommands.join(','), readOnly].join('_'));
 		if (!this.menuOptionsCache_) this.menuOptionsCache_ = {};
 
 		if (this.menuOptionsCache_[cacheKey]) return this.menuOptionsCache_[cacheKey];
@@ -1247,13 +1193,16 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 			});
 		}
 
-		output.push({
-			title: _('Share'),
-			onPress: () => {
-				void this.share_onPress();
-			},
-			disabled: readOnly,
-		});
+		const shareSupported = Platform.OS !== 'web' || !!navigator.share;
+		if (shareSupported) {
+			output.push({
+				title: _('Share'),
+				onPress: () => {
+					void this.share_onPress();
+				},
+				disabled: readOnly,
+			});
+		}
 
 		// Voice typing is enabled only for French language and on Android for now
 		if (voskEnabled && shim.mobilePlatform() === 'android' && isSupportedLanguage(currentLocale())) {
@@ -1291,6 +1240,16 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 					this.copyMarkdownLink_onPress();
 				},
 			});
+
+			// External links are not supported on web.
+			if (Platform.OS !== 'web') {
+				output.push({
+					title: _('Copy external link'),
+					onPress: () => {
+						this.copyExternalLink_onPress();
+					},
+				});
+			}
 		}
 
 		output.push({
@@ -1313,13 +1272,35 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 			});
 		}
 
-		output.push({
-			title: _('Delete'),
-			onPress: () => {
-				void this.deleteNote_onPress();
-			},
-			disabled: readOnly,
-		});
+		const commandService = CommandService.instance();
+		const whenContext = commandService.currentWhenClauseContext();
+		const addButtonFromCommand = (commandName: string, title?: string) => {
+			if (commandName === '-') {
+				output.push({ isDivider: true });
+			} else {
+				output.push({
+					title: title ?? commandService.description(commandName),
+					onPress: async () => {
+						void commandService.execute(commandName);
+					},
+					disabled: !commandService.isEnabled(commandName, whenContext),
+				});
+			}
+		};
+
+		if (whenContext.inTrash) {
+			addButtonFromCommand('permanentlyDeleteNote');
+		} else {
+			addButtonFromCommand('deleteNote', _('Delete'));
+		}
+
+		if (pluginCommands.length) {
+			output.push({ isDivider: true });
+
+			for (const commandName of pluginCommands) {
+				addButtonFromCommand(commandName);
+			}
+		}
 
 		this.menuOptionsCache_ = {};
 		this.menuOptionsCache_[cacheKey] = output;
@@ -1332,38 +1313,50 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 	}
 
 	public scheduleFocusUpdate() {
-		if (this.focusUpdateIID_) shim.clearTimeout(this.focusUpdateIID_);
+		if (this.focusUpdateIID_) shim.clearInterval(this.focusUpdateIID_);
 
-		this.focusUpdateIID_ = shim.setTimeout(() => {
-			this.focusUpdateIID_ = null;
-			this.focusUpdate();
-		}, 100);
+		const startTime = Date.now();
+
+		this.focusUpdateIID_ = shim.setInterval(() => {
+			if (!this.state.note) return;
+
+			let fieldToFocus = this.state.note.is_todo ? 'title' : 'body';
+			if (this.state.mode === 'view') fieldToFocus = '';
+
+			let done = false;
+
+			if (fieldToFocus === 'title' && this.titleTextFieldRef?.current) {
+				done = true;
+				focus('Note::focusUpdate::title', this.titleTextFieldRef.current);
+			} else if (fieldToFocus === 'body' && this.editorRef?.current) {
+				done = true;
+				focus('Note::focusUpdate::body', this.editorRef.current);
+			}
+
+			if (Date.now() - startTime > 5000) {
+				logger.warn(`Timeout while trying to set focus on ${fieldToFocus}`);
+				done = true;
+			}
+
+			if (done) {
+				shim.clearInterval(this.focusUpdateIID_);
+				this.focusUpdateIID_ = null;
+			}
+		}, 50);
 	}
 
-	public focusUpdate() {
-		if (this.focusUpdateIID_) shim.clearTimeout(this.focusUpdateIID_);
-		this.focusUpdateIID_ = null;
-
-		if (!this.state.note) return;
-		let fieldToFocus = this.state.note.is_todo ? 'title' : 'body';
-		if (this.state.mode === 'view') fieldToFocus = '';
-
-		// Avoid writing `this.titleTextFieldRef.current` -- titleTextFieldRef may
-		// be undefined.
-		if (fieldToFocus === 'title' && this.titleTextFieldRef?.current) {
-			focus('Note::focusUpdate', this.titleTextFieldRef.current);
-		}
-	}
-
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	private async folderPickerOptions_valueChanged(itemValue: any) {
+	private async folderPickerOptions_valueChanged(itemValue: string) {
 		const note = this.state.note;
 		const isProvisionalNote = this.props.provisionalNoteIds.includes(note.id);
 
 		if (isProvisionalNote) {
 			await this.saveNoteButton_press(itemValue);
 		} else {
-			await Note.moveToFolder(note.id, itemValue);
+			await Note.moveToFolder(
+				note.id,
+				itemValue,
+				{ dispatchOptions: { preserveSelection: true } },
+			);
 		}
 
 		note.parent_id = itemValue;
@@ -1384,7 +1377,13 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 			onValueChange: this.folderPickerOptions_valueChanged,
 		};
 
-		if (this.folderPickerOptions_ && options.selectedFolderId === this.folderPickerOptions_.selectedFolderId) return this.folderPickerOptions_;
+		if (
+			this.folderPickerOptions_
+			&& options.selectedFolderId === this.folderPickerOptions_.selectedFolderId
+			&& options.enabled === this.folderPickerOptions_.enabled
+		) {
+			return this.folderPickerOptions_;
+		}
 
 		this.folderPickerOptions_ = options;
 		return this.folderPickerOptions_;
@@ -1532,7 +1531,7 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 					onChange={this.onMarkdownEditorTextChange}
 					onSelectionChange={this.onMarkdownEditorSelectionChange}
 					onUndoRedoDepthChange={this.onUndoRedoDepthChange}
-					onAttach={() => this.showAttachMenu()}
+					onAttach={this.onAttach}
 					readOnly={this.state.readOnly}
 					plugins={this.props.plugins}
 					style={{
@@ -1562,7 +1561,7 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 
 			if (this.state.mode === 'edit') return null;
 
-			return <ActionButton mainButton={editButton} dispatch={this.props.dispatch} />;
+			return <FloatingActionButton mainButton={editButton} dispatch={this.props.dispatch} />;
 		};
 
 		// Save button is not really needed anymore with the improved save logic
@@ -1635,16 +1634,25 @@ class NoteScreenComponent extends BaseScreenComponent<Props, State> implements B
 	}
 }
 
+// We added this change to reset the component state when the props.noteId is changed.
+// NoteScreenComponent original implementation assumed that noteId would never change,
+// which can cause some bugs where previously set state to another note would interfere
+// how the new note should be rendered
+const NoteScreenWrapper = (props: Props) => {
+	return (
+		<NoteScreenComponent key={props.noteId} {...props} />
+	);
+};
+
 const NoteScreen = connect((state: AppState) => {
 	return {
 		noteId: state.selectedNoteIds.length ? state.selectedNoteIds[0] : null,
 		noteHash: state.selectedNoteHash,
-		folderId: state.selectedFolderId,
 		itemType: state.selectedItemType,
 		folders: state.folders,
 		searchQuery: state.searchQuery,
 		themeId: state.settings.theme,
-		editorFont: [state.settings['style.editor.fontFamily']],
+		editorFont: state.settings['style.editor.fontFamily'] as number,
 		editorFontSize: state.settings['style.editor.fontSize'],
 		toolbarEnabled: state.settings['editor.mobile.toolbarEnabled'],
 		ftsEnabled: state.settings['db.ftsEnabled'],
@@ -1659,6 +1667,6 @@ const NoteScreen = connect((state: AppState) => {
 		// confusing.
 		useEditorBeta: !state.settings['editor.usePlainText'],
 	};
-})(NoteScreenComponent);
+})(NoteScreenWrapper);
 
 export default NoteScreen;

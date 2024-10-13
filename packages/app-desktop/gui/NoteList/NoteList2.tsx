@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { _ } from '@joplin/lib/locale';
-import { useMemo, useRef, useEffect } from 'react';
+import { useMemo, useRef, useEffect, useCallback } from 'react';
 import { AppState } from '../../app.reducer';
 import BaseModel, { ModelType } from '@joplin/lib/BaseModel';
 import { Props } from './utils/types';
@@ -22,7 +21,12 @@ import * as focusElementNoteList from './commands/focusElementNoteList';
 import CommandService from '@joplin/lib/services/CommandService';
 import useDragAndDrop from './utils/useDragAndDrop';
 import { itemIsInTrash } from '@joplin/lib/services/trash';
+import getEmptyFolderMessage from '@joplin/lib/components/shared/NoteList/getEmptyFolderMessage';
 import Folder from '@joplin/lib/models/Folder';
+import { _ } from '@joplin/lib/locale';
+import useActiveDescendantId from './utils/useActiveDescendantId';
+import getNoteElementIdFromJoplinId from '../NoteListItem/utils/getNoteElementIdFromJoplinId';
+import useFocusVisible from './utils/useFocusVisible';
 const { connect } = require('react-redux');
 
 const commands = {
@@ -30,7 +34,7 @@ const commands = {
 };
 
 const NoteList = (props: Props) => {
-	const listRef = useRef(null);
+	const listRef = useRef<HTMLDivElement>(null);
 	const itemRefs = useRef<Record<string, HTMLDivElement>>({});
 	const listRenderer = props.listRenderer;
 
@@ -65,7 +69,8 @@ const NoteList = (props: Props) => {
 		props.notes.length,
 	);
 
-	const focusNote = useFocusNote(itemRefs);
+	const { activeNoteId, setActiveNoteId } = useActiveDescendantId(props.selectedFolderId, props.selectedNoteIds);
+	const focusNote = useFocusNote(listRef, props.notes, makeItemIndexVisible, setActiveNoteId);
 
 	const moveNote = useMoveNote(
 		props.notesParentType,
@@ -98,6 +103,7 @@ const NoteList = (props: Props) => {
 	const onNoteClick = useOnNoteClick(props.dispatch, focusNote);
 
 	const onKeyDown = useOnKeyDown(
+		activeNoteId,
 		props.selectedNoteIds,
 		moveNote,
 		makeItemIndexVisible,
@@ -177,6 +183,10 @@ const NoteList = (props: Props) => {
 	// 	}
 	// }, [makeItemIndexVisible, previousSelectedNoteIds, previousNoteCount, previousVisible, props.selectedNoteIds, props.notes, props.focusedField, props.visible]);
 
+	const { focusVisible, onFocus, onBlur, onKeyUp } = useFocusVisible(listRef, () => {
+		focusNote(activeNoteId);
+	});
+
 	const highlightedWords = useMemo(() => {
 		if (props.notesParentType === 'Search') {
 			const query = BaseModel.byId(props.searches, props.selectedSearchId);
@@ -187,7 +197,7 @@ const NoteList = (props: Props) => {
 
 	const renderEmptyList = () => {
 		if (props.notes.length) return null;
-		return <div className="emptylist">{props.folders.length ? _('No notes in here. Create one by clicking on "New note".') : _('There is currently no notebook. Create one by clicking on "New notebook".')}</div>;
+		return <div className="emptylist">{getEmptyFolderMessage(props.folders, props.selectedFolderId)}</div>;
 	};
 
 	const renderFiller = (key: string, style: React.CSSProperties) => {
@@ -197,12 +207,13 @@ const NoteList = (props: Props) => {
 	};
 
 	const renderNotes = () => {
-		if (!props.notes.length) return null;
+		if (!props.notes.length) return [];
 
 		const output: JSX.Element[] = [];
 
 		for (let i = startNoteIndex; i <= endNoteIndex; i++) {
 			const note = props.notes[i];
+			const isSelected = props.selectedNoteIds.includes(note.id);
 
 			output.push(
 				<NoteListItem
@@ -222,7 +233,9 @@ const NoteList = (props: Props) => {
 					isProvisional={props.provisionalNoteIds.includes(note.id)}
 					flow={listRenderer.flow}
 					note={note}
-					isSelected={props.selectedNoteIds.includes(note.id)}
+					tabIndex={-1}
+					focusVisible={focusVisible && activeNoteId === note.id}
+					isSelected={isSelected}
 					isWatched={props.watchedNoteFiles.includes(note.id)}
 					listRenderer={listRenderer}
 					dispatch={props.dispatch}
@@ -262,18 +275,35 @@ const NoteList = (props: Props) => {
 		return output;
 	}, [listRenderer.flow]);
 
+	const onContainerContextMenu = useCallback((event: React.MouseEvent) => {
+		const isFromKeyboard = event.button === -1;
+		if (event.isDefaultPrevented() || !isFromKeyboard) return;
+		onItemContextMenu({ itemId: activeNoteId });
+	}, [onItemContextMenu, activeNoteId]);
+
 	return (
 		<div
+			role='listbox'
+			aria-label={_('Notes')}
+			aria-activedescendant={getNoteElementIdFromJoplinId(activeNoteId)}
+			aria-multiselectable={true}
+			tabIndex={0}
+
+			onFocus={onFocus}
+			onBlur={onBlur}
+
 			className="note-list"
 			style={noteListStyle}
 			ref={listRef}
 			onScroll={onScroll}
 			onKeyDown={onKeyDown}
+			onKeyUp={onKeyUp}
 			onDrop={onDrop}
+			onContextMenu={onContainerContextMenu}
 		>
 			{renderEmptyList()}
 			{renderFiller('top', topFillerStyle)}
-			<div className="notes" style={notesStyle}>
+			<div className='notes' role='presentation' style={notesStyle}>
 				{renderNotes()}
 			</div>
 			{renderFiller('bottom', bottomFillerStyle)}

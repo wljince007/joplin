@@ -10,6 +10,7 @@ import PluginService, { PluginSettings } from '@joplin/lib/services/plugins/Plug
 import { _ } from '@joplin/lib/locale';
 import useOnInstallHandler from '@joplin/lib/components/shared/config/plugins/useOnInstallHandler';
 import { themeStyle } from '@joplin/lib/theme';
+import SettingDescription from '../SettingDescription';
 
 const Root = styled.div`
 `;
@@ -26,8 +27,6 @@ interface Props {
 	pluginSettings: PluginSettings;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	onPluginSettingsChange(event: any): void;
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-	renderDescription: Function;
 	maxWidth: number;
 	repoApi(): RepositoryApi;
 	disabled: boolean;
@@ -40,7 +39,10 @@ export default function(props: Props) {
 	const [installingPluginsIds, setInstallingPluginIds] = useState<Record<string, boolean>>({});
 	const [searchResultCount, setSearchResultCount] = useState(null);
 
-	const onInstall = useOnInstallHandler(setInstallingPluginIds, props.pluginSettings, props.repoApi, props.onPluginSettingsChange, false);
+	const pluginSettingsRef = useRef(props.pluginSettings);
+	pluginSettingsRef.current = props.pluginSettings;
+
+	const onInstall = useOnInstallHandler(setInstallingPluginIds, pluginSettingsRef, props.repoApi, props.onPluginSettingsChange, false);
 
 	useEffect(() => {
 		setSearchResultCount(null);
@@ -78,7 +80,7 @@ export default function(props: Props) {
 	function renderResults(query: string, manifests: PluginManifest[]) {
 		if (query && !manifests.length) {
 			if (searchResultCount === null) return ''; // Search in progress
-			return props.renderDescription(props.themeId, _('No results'));
+			return <SettingDescription text={_('No results')}/>;
 		} else {
 			const output = [];
 

@@ -1,5 +1,5 @@
 import { RefObject, useEffect } from 'react';
-import { FormNote, NoteBodyEditorRef, ScrollOptionTypes } from './types';
+import { NoteBodyEditorRef, OnChangeEvent, ScrollOptionTypes } from './types';
 import editorCommandDeclarations, { enabledCondition } from '../editorCommandDeclarations';
 import CommandService, { CommandDeclaration, CommandRuntime, CommandContext } from '@joplin/lib/services/CommandService';
 import time from '@joplin/lib/time';
@@ -12,10 +12,9 @@ const commandsWithDependencies = [
 	require('../commands/pasteAsText'),
 ];
 
-type SetFormNoteCallback = (callback: (prev: FormNote)=> FormNote)=> void;
+type OnBodyChange = (event: OnChangeEvent)=> void;
 
 interface HookDependencies {
-	formNote: FormNote;
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 	setShowLocalSearch: Function;
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
@@ -23,17 +22,14 @@ interface HookDependencies {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	noteSearchBarRef: any;
 	editorRef: RefObject<NoteBodyEditorRef>;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	titleInputRef: any;
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-	saveNoteAndWait: Function;
-	setFormNote: SetFormNoteCallback;
+	titleInputRef: RefObject<HTMLInputElement>;
+	onBodyChange: OnBodyChange;
 }
 
 function editorCommandRuntime(
 	declaration: CommandDeclaration,
 	editorRef: RefObject<NoteBodyEditorRef>,
-	setFormNote: SetFormNoteCallback,
+	onBodyChange: OnBodyChange,
 ): CommandRuntime {
 	return {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -59,9 +55,7 @@ function editorCommandRuntime(
 					value: args[0],
 				});
 			} else if (declaration.name === 'editor.setText') {
-				setFormNote((prev: FormNote) => {
-					return { ...prev, body: args[0] };
-				});
+				onBodyChange({ content: args[0], changeId: 0 });
 			} else {
 				return editorRef.current.execCommand({
 					name: declaration.name,
@@ -82,11 +76,11 @@ function editorCommandRuntime(
 }
 
 export default function useWindowCommandHandler(dependencies: HookDependencies) {
-	const { setShowLocalSearch, noteSearchBarRef, editorRef, titleInputRef, setFormNote } = dependencies;
+	const { setShowLocalSearch, noteSearchBarRef, editorRef, titleInputRef, onBodyChange } = dependencies;
 
 	useEffect(() => {
 		for (const declaration of editorCommandDeclarations) {
-			CommandService.instance().registerRuntime(declaration.name, editorCommandRuntime(declaration, editorRef, setFormNote));
+			CommandService.instance().registerRuntime(declaration.name, editorCommandRuntime(declaration, editorRef, onBodyChange));
 		}
 
 		const dependencies = {
@@ -109,6 +103,5 @@ export default function useWindowCommandHandler(dependencies: HookDependencies) 
 				CommandService.instance().unregisterRuntime(command.declaration.name);
 			}
 		};
-		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
-	}, [editorRef, setShowLocalSearch, noteSearchBarRef, titleInputRef]);
+	}, [editorRef, setShowLocalSearch, noteSearchBarRef, titleInputRef, onBodyChange]);
 }

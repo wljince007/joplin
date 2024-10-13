@@ -9,27 +9,9 @@ import Logger from '@joplin/utils/Logger';
 import CodeMirrorControl from '@joplin/editor/CodeMirror/CodeMirrorControl';
 import { MarkupLanguage } from '@joplin/renderer';
 import { focus } from '@joplin/lib/utils/focusHandler';
+import { FocusElementOptions } from '../../../../../commands/focusElement';
 
 const logger = Logger.create('CodeMirror 6 commands');
-
-const wrapSelectionWithStrings = (editor: CodeMirrorControl, string1: string, string2 = '', defaultText = '') => {
-	if (editor.somethingSelected()) {
-		editor.wrapSelections(string1, string2);
-	} else {
-		editor.wrapSelections(string1 + defaultText, string2);
-
-		// Now select the default text so the user can replace it
-		const selections = editor.listSelections();
-		const newSelections = [];
-		for (let i = 0; i < selections.length; i++) {
-			const s = selections[i];
-			const anchor = { line: s.anchor.line, ch: s.anchor.ch + string1.length };
-			const head = { line: s.head.line, ch: s.head.ch - string2.length };
-			newSelections.push({ anchor: anchor, head: head });
-		}
-		editor.setSelections(newSelections);
-	}
-};
 
 interface Props {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -92,7 +74,9 @@ const useEditorCommands = (props: Props) => {
 			textLink: async () => {
 				const url = await dialogs.prompt(_('Insert Hyperlink'));
 				focus('useEditorCommands::textLink', editorRef.current);
-				if (url) wrapSelectionWithStrings(editorRef.current, '[', `](${url})`);
+				if (url) {
+					editorRef.current.wrapSelections('[', `](${url})`);
+				}
 			},
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 			insertText: (value: any) => editorRef.current.insertText(value),
@@ -104,7 +88,7 @@ const useEditorCommands = (props: Props) => {
 					editorRef.current.updateBody(newBody);
 				}
 			},
-			textHorizontalRule: () => editorRef.current.insertText('* * *'),
+			textHorizontalRule: () => editorRef.current.execCommand(EditorCommandType.InsertHorizontalRule),
 			'editor.execCommand': (value: CommandValue) => {
 				if (!('args' in value)) value.args = [];
 
@@ -120,9 +104,15 @@ const useEditorCommands = (props: Props) => {
 					logger.warn('CodeMirror execCommand: unsupported command: ', value.name);
 				}
 			},
-			'editor.focus': () => {
+			'editor.focus': (options?: FocusElementOptions) => {
 				if (props.visiblePanes.indexOf('editor') >= 0) {
 					focus('useEditorCommands::editor.focus', editorRef.current.editor);
+					if (options?.moveCursorToStart) {
+						editorRef.current.editor.dispatch({
+							selection: { anchor: 0 },
+							scrollIntoView: true,
+						});
+					}
 				} else {
 					// If we just call focus() then the iframe is focused,
 					// but not its content, such that scrolling up / down

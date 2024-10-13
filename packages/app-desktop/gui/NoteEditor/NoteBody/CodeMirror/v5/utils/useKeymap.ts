@@ -4,7 +4,7 @@ import KeymapService, { KeymapItem } from '@joplin/lib/services/KeymapService';
 import { EditorCommand } from '../../../../utils/types';
 import shim from '@joplin/lib/shim';
 import { reg } from '@joplin/lib/registry';
-import setupVim from '@joplin/editor/CodeMirror/util/setupVim';
+import setupVim from '@joplin/editor/CodeMirror/utils/setupVim';
 import { EventName } from '@joplin/lib/eventManager';
 import normalizeAccelerator from '../../utils/normalizeAccelerator';
 import { CodeMirrorVersion } from '../../utils/types';
@@ -160,7 +160,7 @@ export default function useKeymap(CodeMirror: any) {
 		keymapService.on(EventName.KeymapChange, registerKeymap);
 
 		setupEmacs();
-		setupVim(CodeMirror);
+		setupVim(CodeMirror, null);
 		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
 	}, []);
 }

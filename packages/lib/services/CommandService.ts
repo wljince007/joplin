@@ -3,6 +3,7 @@ import eventManager, { EventListenerCallback, EventName } from '../eventManager'
 import BaseService from './BaseService';
 import shim from '../shim';
 import WhenClause from './WhenClause';
+import type { WhenClauseContext } from './commands/stateToWhenClauseContext';
 
 type LabelFunction = ()=> string;
 type EnabledCondition = string;
@@ -124,11 +125,11 @@ export default class CommandService extends BaseService {
 		this.stateToWhenClauseContext_ = stateToWhenClauseContext;
 	}
 
-	public on(eventName: EventName, callback: EventListenerCallback) {
+	public on<Name extends EventName>(eventName: Name, callback: EventListenerCallback<Name>) {
 		eventManager.on(eventName, callback);
 	}
 
-	public off(eventName: EventName, callback: EventListenerCallback) {
+	public off<Name extends EventName>(eventName: Name, callback: EventListenerCallback<Name>) {
 		eventManager.off(eventName, callback);
 	}
 
@@ -271,7 +272,7 @@ export default class CommandService extends BaseService {
 		}, 10);
 	}
 
-	public currentWhenClauseContext() {
+	public currentWhenClauseContext(): WhenClauseContext {
 		return this.stateToWhenClauseContext_(this.store_.getState());
 	}
 

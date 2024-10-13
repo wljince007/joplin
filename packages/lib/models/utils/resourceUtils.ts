@@ -1,5 +1,5 @@
 import type { ResourceEntity } from '../../services/database/types';
-const { mime } = require('../../mime-utils.js');
+import * as mime from '../../mime-utils';
 import { filename } from '@joplin/utils/path';
 
 // This file contains resource-related utilities that do not
@@ -38,6 +38,6 @@ export const resourceUrlToId = (url: string) => {
 };
 
 export const isSupportedImageMimeType = (type: string) => {
-	const imageMimeTypes = ['image/jpg', 'image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/webp', 'image/avif'];
+	const imageMimeTypes = ['image/jpg', 'image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/webp', 'image/avif', 'image/bmp'];
 	return imageMimeTypes.indexOf(type.toLowerCase()) >= 0;
 };

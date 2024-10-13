@@ -1,81 +1,46 @@
-import { afterAllTests, beforeAllDb, beforeEachDb, db } from './utils/testing/testUtils';
-import sqlts from '@rmp135/sql-ts';
-import { DbConnection, migrateDown, migrateLatest, migrateUp, needsMigration, nextMigration } from './db';
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-async function dbSchemaSnapshot(db: DbConnection): Promise<any> {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	return sqlts.toTypeScript({}, db as any);
-}
+import { DbConnection, versionCheck } from './db';
+import { } from './env';
+import { DatabaseConfigClient } from './utils/types';
 
 describe('db', () => {
 
-	beforeEach(async () => {
-		await beforeAllDb('db', { autoMigrate: false });
-		await beforeEachDb();
-	});
-
-	afterEach(async () => {
-		await afterAllTests();
-	});
-
-	it('should allow upgrading and downgrading schema', async () => {
-		// Migrations before that didn't have a down() step.
-		const ignoreAllBefore = '20210819165350_user_flags';
-
-		// Some migrations produce no changes visible to sql-ts, in particular
-		// when the migration only adds a constraint or an index, or when a
-		// default is changed. In this case we skip the migration. Ideally we
-		// should test these too but for now that will do.
-		const doNoCheckUpgrade = [
-			'20211030103016_item_owner_name_unique',
-			'20211111134329_storage_index',
-			'20220121172409_email_recipient_default',
-			'20240413141308_changes_optimization',
-		];
-
-		let startProcessing = false;
-
-		while (true) {
-			await migrateUp(db());
-
-			if (!startProcessing) {
-				const next = await nextMigration(db());
-				if (next === ignoreAllBefore) {
-					startProcessing = true;
-				} else {
-					continue;
-				}
+	const mockedDb = (version: string, client: DatabaseConfigClient = DatabaseConfigClient.PostgreSQL) => {
+		return {
+			select: () => {
+				return {
+					first: () => ({
+						version,
+					}),
+				};
 			}
+			,
+			raw: () => '',
+			client: {
+				config: { client },
+			},
+		} as unknown as DbConnection;
+	};
 
-			const next = await nextMigration(db());
+	it.each(
+		[
+			'PostgreSQL 15.3 (Debian 15.3-1.pgdg120+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14) 12.2.0, 64-bit',
+			'PostgreSQL 16.3, compiled by Visual C++ build 1938, 64-bit"',
+		],
+	)('should handle versionCheck on all known string versions', (versionDescription: string) => {
 
-			if (!next) break;
-
-			const initialSchema = await dbSchemaSnapshot(db());
-
-			await migrateUp(db());
-
-			const afterUpgradeSchema = await dbSchemaSnapshot(db());
-
-			if (!doNoCheckUpgrade.includes(next)) {
-				expect(initialSchema, `Schema upgrade did not produce a new schema. In migration: ${next}`).not.toEqual(afterUpgradeSchema);
-			}
-
-			await migrateDown(db());
-
-			const afterRollbackSchema = await dbSchemaSnapshot(db());
-
-			expect(initialSchema, `Schema rollback did not produce previous schema. In migration: ${next}`).toEqual(afterRollbackSchema);
-		}
+		expect(versionCheck(mockedDb(versionDescription))).resolves.toBe(undefined);
 	});
 
-	it('should tell if a migration is required', async () => {
-		expect(await needsMigration(db())).toBe(true);
+	it.each([
+		'PostgreSQL 11.16 (Debian 11.16-1.pgdg90+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 6.3.0-18+deb9u1) 6.3.0 20170516, 64-bit',
+	])('should throw because it is a outdated version', (versionDescription: string) => {
 
-		await migrateLatest(db());
-
-		expect(await needsMigration(db())).toBe(false);
+		expect(versionCheck(mockedDb(versionDescription))).rejects.toThrow(`Postgres version not supported: ${versionDescription}. Min required version is: 12.0`);
 	});
 
+	it('should not check version if client is not SQLite', () => {
+		const sqliteDb = mockedDb('invalid version', DatabaseConfigClient.SQLite);
+
+		expect(versionCheck(sqliteDb)).resolves.toBe(undefined);
+	});
 });

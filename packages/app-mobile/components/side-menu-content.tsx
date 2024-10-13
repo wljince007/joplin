@@ -1,6 +1,6 @@
 const React = require('react');
-import { useMemo, useEffect, useCallback } from 'react';
-const { Easing, Animated, TouchableOpacity, Text, StyleSheet, ScrollView, View, Alert, Image } = require('react-native');
+import { useMemo, useEffect, useCallback, useContext } from 'react';
+const { Easing, Animated, TouchableOpacity, Text, StyleSheet, ScrollView, View, Image } = require('react-native');
 const { connect } = require('react-redux');
 const Icon = require('react-native-vector-icons/Ionicons').default;
 import Folder from '@joplin/lib/models/Folder';
@@ -8,7 +8,7 @@ import Synchronizer from '@joplin/lib/Synchronizer';
 import NavService from '@joplin/lib/services/NavService';
 import { _ } from '@joplin/lib/locale';
 import { ThemeStyle, themeStyle } from './global-style';
-import { renderFolders } from '@joplin/lib/components/shared/side-menu-shared';
+import { buildFolderTree, isFolderSelected, renderFolders } from '@joplin/lib/components/shared/side-menu-shared';
 import { FolderEntity, FolderIcon, FolderIconType } from '@joplin/lib/services/database/types';
 import { AppState } from '../utils/types';
 import Setting from '@joplin/lib/models/Setting';
@@ -18,12 +18,13 @@ import { getTrashFolderIcon, getTrashFolderId } from '@joplin/lib/services/trash
 import restoreItems from '@joplin/lib/services/trash/restoreItems';
 import emptyTrash from '@joplin/lib/services/trash/emptyTrash';
 import { ModelType } from '@joplin/lib/BaseModel';
+import { DialogContext } from './DialogManager';
+const { TouchableRipple } = require('react-native-paper');
 const { substrWithEllipsis } = require('@joplin/lib/string-utils');
 
 interface Props {
 	syncStarted: boolean;
 	themeId: number;
-	sideMenuVisible: boolean;
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 	dispatch: Function;
 	collapsedFolderIds: string[];
@@ -71,6 +72,7 @@ const SideMenuContentComponent = (props: Props) => {
 			button: {
 				flex: 1,
 				flexDirection: 'row',
+				flexBasis: 'auto',
 				height: 36,
 				alignItems: 'center',
 				paddingLeft: theme.marginLeft,
@@ -93,6 +95,8 @@ const SideMenuContentComponent = (props: Props) => {
 				fontSize: 22,
 				color: theme.color,
 				width: 26,
+				textAlign: 'center',
+				textAlignVertical: 'center',
 			},
 		};
 
@@ -142,6 +146,8 @@ const SideMenuContentComponent = (props: Props) => {
 		});
 	};
 
+	const dialogs = useContext(DialogContext);
+
 	const folder_longPress = async (folderOrAll: FolderEntity | string) => {
 		if (folderOrAll === 'all') return;
 
@@ -154,7 +160,7 @@ const SideMenuContentComponent = (props: Props) => {
 			menuItems.push({
 				text: _('Empty trash'),
 				onPress: async () => {
-					Alert.alert('', _('This will permanently delete all items in the trash. Continue?'), [
+					dialogs.prompt('', _('This will permanently delete all items in the trash. Continue?'), [
 						{
 							text: _('Empty trash'),
 							onPress: async () => {
@@ -204,7 +210,7 @@ const SideMenuContentComponent = (props: Props) => {
 		} else {
 			const generateFolderDeletion = () => {
 				const folderDeletion = (message: string) => {
-					Alert.alert('', message, [
+					dialogs.prompt('', message, [
 						{
 							text: _('OK'),
 							onPress: () => {
@@ -253,13 +259,10 @@ const SideMenuContentComponent = (props: Props) => {
 			style: 'cancel',
 		});
 
-		Alert.alert(
+		dialogs.prompt(
 			'',
 			_('Notebook: %s', folder.title),
 			menuItems,
-			{
-				cancelable: false,
-			},
 		);
 	};
 
@@ -391,18 +394,20 @@ const SideMenuContentComponent = (props: Props) => {
 		}
 	};
 
-	const renderFolderItem = (folder: FolderEntity, selected: boolean, hasChildren: boolean, depth: number) => {
+	const renderFolderItem = (folder: FolderEntity, hasChildren: boolean, depth: number) => {
 		const theme = themeStyle(props.themeId);
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		const folderButtonStyle: any = {
 			flex: 1,
 			flexDirection: 'row',
+			flexBasis: 'auto',
 			height: 36,
 			alignItems: 'center',
 			paddingRight: theme.marginRight,
 			paddingLeft: 10,
 		};
+		const selected = isFolderSelected(folder, { selectedFolderId: props.selectedFolderId, notesParentType: props.notesParentType });
 		if (selected) folderButtonStyle.backgroundColor = theme.selectedColor;
 		folderButtonStyle.paddingLeft = depth * 10 + theme.marginLeft;
 
@@ -435,14 +440,19 @@ const SideMenuContentComponent = (props: Props) => {
 
 		return (
 			<View key={folder.id} style={{ flex: 1, flexDirection: 'row' }}>
-				<TouchableOpacity
-					style={{ flex: 1 }}
+				<TouchableRipple
+					style={{ flex: 1, flexBasis: 'auto' }}
 					onPress={() => {
 						folder_press(folder);
 					}}
 					onLongPress={() => {
 						void folder_longPress(folder);
 					}}
+					onContextMenu={(event: Event) => { // web only
+						event.preventDefault();
+						void folder_longPress(folder);
+					}}
+					role='button'
 				>
 					<View style={folderButtonStyle}>
 						{renderFolderIcon(folder.id, theme, folderIcon)}
@@ -450,7 +460,7 @@ const SideMenuContentComponent = (props: Props) => {
 							{Folder.displayTitle(folder)}
 						</Text>
 					</View>
-				</TouchableOpacity>
+				</TouchableRipple>
 				{iconWrapper}
 			</View>
 		);
@@ -458,7 +468,7 @@ const SideMenuContentComponent = (props: Props) => {
 
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 	const renderSidebarButton = (key: string, title: string, iconName: string, onPressHandler: Function = null, selected = false) => {
-		let icon = <Icon name={iconName} style={styles_.sidebarIcon} />;
+		let icon = <Icon name={iconName} style={styles_.sidebarIcon} aria-hidden={true} />;
 
 		if (key === 'synchronize_button') {
 			icon = <Animated.View style={{ transform: [{ rotate: syncIconRotation }] }}>{icon}</Animated.View>;
@@ -474,7 +484,7 @@ const SideMenuContentComponent = (props: Props) => {
 		if (!onPressHandler) return content;
 
 		return (
-			<TouchableOpacity key={key} onPress={onPressHandler}>
+			<TouchableOpacity key={key} onPress={onPressHandler} role='button'>
 				{content}
 			</TouchableOpacity>
 		);
@@ -540,7 +550,7 @@ const SideMenuContentComponent = (props: Props) => {
 			);
 		}
 
-		return <View style={{ flex: 0, flexDirection: 'column', paddingBottom: theme.marginBottom }}>{items}</View>;
+		return <View style={{ flex: 0, flexDirection: 'column', flexBasis: 'auto', paddingBottom: theme.marginBottom }}>{items}</View>;
 	};
 
 	let items = [];
@@ -557,35 +567,29 @@ const SideMenuContentComponent = (props: Props) => {
 
 	items.push(renderSidebarButton('folder_header', _('Notebooks'), 'folder'));
 
+	const folderTree = useMemo(() => {
+		return buildFolderTree(props.folders);
+	}, [props.folders]);
+
 	if (props.folders.length) {
-		const result = renderFolders(props, renderFolderItem);
+		const result = renderFolders({
+			folderTree,
+			collapsedFolderIds: props.collapsedFolderIds,
+		}, renderFolderItem);
+
 		const folderItems = result.items;
 		items = items.concat(folderItems);
 	}
-
-	const isHidden = !props.sideMenuVisible;
 
 	const style = {
 		flex: 1,
 		borderRightWidth: 1,
 		borderRightColor: theme.dividerColor,
 		backgroundColor: theme.backgroundColor,
-
-		// Have the UI reflect whether the View is hidden to the screen reader.
-		// This way, there will be visual feedback if isHidden is incorrect.
-		opacity: isHidden ? 0.5 : undefined,
 	};
 
-	// Note: iOS uses accessibilityElementsHidden and Android uses importantForAccessibility
-	//       to hide elements from the screenreader.
-
 	return (
-		<View
-			style={style}
-
-			accessibilityElementsHidden={isHidden}
-			importantForAccessibility={isHidden ? 'no-hide-descendants' : undefined}
-		>
+		<View style={style}>
 			<View style={{ flex: 1, opacity: props.opacity }}>
 				<ScrollView scrollsToTop={false} style={styles_.menu}>
 					{items}
@@ -606,9 +610,6 @@ export default connect((state: AppState) => {
 		notesParentType: state.notesParentType,
 		locale: state.settings.locale,
 		themeId: state.settings.theme,
-		sideMenuVisible: state.showSideMenu,
-		// Don't do the opacity animation as it means re-rendering the list multiple times
-		// opacity: state.sideMenuOpenPercent,
 		collapsedFolderIds: state.collapsedFolderIds,
 		decryptionWorker: state.decryptionWorker,
 		resourceFetcher: state.resourceFetcher,

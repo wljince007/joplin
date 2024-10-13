@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { UpdateSettingValueCallback } from './types';
 import { View, Text, TextInput } from 'react-native';
-import Setting from '@joplin/lib/models/Setting';
+import Setting, { AppType } from '@joplin/lib/models/Setting';
 import Dropdown from '../../Dropdown';
 import { ConfigScreenStyles } from './configScreenStyles';
 import Slider from '@react-native-community/slider';
@@ -32,7 +32,7 @@ const SettingComponent: React.FunctionComponent<Props> = props => {
 	const output: any = null;
 
 	const md = Setting.settingMetadata(props.settingId);
-	const settingDescription = md.description ? md.description() : '';
+	const settingDescription = md.description ? md.description(AppType.Mobile) : '';
 
 	const styleSheet = props.styles.styleSheet;
 
@@ -115,9 +115,10 @@ const SettingComponent: React.FunctionComponent<Props> = props => {
 			</View>
 		);
 	} else if (md.type === Setting.TYPE_STRING) {
-		if (md.key === 'sync.2.path' && shim.fsDriver().isUsingAndroidSAF()) {
+		if (['sync.2.path', 'plugins.devPluginPaths'].includes(md.key) && (shim.fsDriver().isUsingAndroidSAF() || shim.mobilePlatform() === 'web')) {
 			return (
 				<FileSystemPathSelector
+					mode={md.key === 'sync.2.path' ? 'readwrite' : 'read'}
 					styles={props.styles}
 					settingMetadata={md}
 					updateSettingValue={props.updateSettingValue}

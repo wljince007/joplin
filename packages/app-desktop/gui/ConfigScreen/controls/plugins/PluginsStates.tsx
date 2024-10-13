@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import PluginService, { defaultPluginSetting, Plugins, PluginSetting, PluginSettings } from '@joplin/lib/services/plugins/PluginService';
 import { _ } from '@joplin/lib/locale';
 import styled from 'styled-components';
@@ -17,6 +17,8 @@ import useOnDeleteHandler from '@joplin/lib/components/shared/config/plugins/use
 import Logger from '@joplin/utils/Logger';
 import StyledMessage from '../../../style/StyledMessage';
 import StyledLink from '../../../style/StyledLink';
+import SettingHeader from '../SettingHeader';
+import SettingDescription from '../SettingDescription';
 const { space } = require('styled-system');
 
 const logger = Logger.create('PluginState');
@@ -51,12 +53,6 @@ interface Props {
 	themeId: number;
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
 	onChange: Function;
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-	renderLabel: Function;
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-	renderDescription: Function;
-	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
-	renderHeader: Function;
 }
 
 let repoApi_: RepositoryApi = null;
@@ -83,6 +79,7 @@ function usePluginItems(plugins: Plugins, settings: PluginSettings): PluginItem[
 
 			output.push({
 				manifest: plugin.manifest,
+				installed: true,
 				enabled: setting.enabled,
 				deleted: setting.deleted,
 				devMode: plugin.devMode,
@@ -213,8 +210,11 @@ export default function(props: Props) {
 		props.onChange({ value: pluginService.serializePluginSettings(event.value) });
 	}, [pluginService, props.onChange]);
 
-	const onDelete = useOnDeleteHandler(pluginSettings, onPluginSettingsChange, false);
-	const onUpdate = useOnInstallHandler(setUpdatingPluginIds, pluginSettings, repoApi, onPluginSettingsChange, true);
+	const pluginSettingsRef = useRef(pluginSettings);
+	pluginSettingsRef.current = pluginSettings;
+
+	const onDelete = useOnDeleteHandler(pluginSettingsRef, onPluginSettingsChange, false);
+	const onUpdate = useOnInstallHandler(setUpdatingPluginIds, pluginSettingsRef, repoApi, onPluginSettingsChange, true);
 
 	const onToolsClick = useCallback(async () => {
 		const template = [
@@ -277,7 +277,7 @@ export default function(props: Props) {
 		if (!pluginItems.length || allDeleted) {
 			return (
 				<UserPluginsRoot mb={'10px'}>
-					{props.renderDescription(props.themeId, _('You do not have any installed plugin.'))}
+					<SettingDescription text={_('You do not have any installed plugin.')}/>
 				</UserPluginsRoot>
 			);
 		} else {
@@ -307,7 +307,6 @@ export default function(props: Props) {
 					pluginSettings={pluginSettings}
 					onSearchQueryChange={onSearchQueryChange}
 					onPluginSettingsChange={onSearchPluginSettingsChange}
-					renderDescription={props.renderDescription}
 					repoApi={repoApi}
 				/>
 			</div>
@@ -329,7 +328,7 @@ export default function(props: Props) {
 				<div style={{ display: 'flex', flexDirection: 'row', maxWidth }}>
 					<ToolsButton size={ButtonSize.Small} tooltip={_('Plugin tools')} iconName="fas fa-cog" level={ButtonLevel.Secondary} onClick={onToolsClick}/>
 					<div style={{ display: 'flex', flex: 1 }}>
-						{props.renderHeader(props.themeId, _('Manage your plugins'))}
+						<SettingHeader text={_('Manage your plugins')}/>
 					</div>
 				</div>
 				{renderUserPlugins(pluginItems)}

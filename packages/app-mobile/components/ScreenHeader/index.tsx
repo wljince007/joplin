@@ -1,21 +1,19 @@
 import * as React from 'react';
 import { PureComponent, ReactElement } from 'react';
 import { connect } from 'react-redux';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Dimensions, ViewStyle } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ViewStyle, Platform } from 'react-native';
 const Icon = require('react-native-vector-icons/Ionicons').default;
-const { BackButtonService } = require('../../services/back-button.js');
+import BackButtonService from '../../services/BackButtonService';
 import NavService from '@joplin/lib/services/NavService';
-import { Menu, MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
 import { _, _n } from '@joplin/lib/locale';
 import Note from '@joplin/lib/models/Note';
 import Folder from '@joplin/lib/models/Folder';
 import { themeStyle } from '../global-style';
 import { OnValueChangedListener } from '../Dropdown';
-const { dialogs } = require('../../utils/dialogs.js');
 const DialogBox = require('react-native-dialogbox').default;
 import { FolderEntity } from '@joplin/lib/services/database/types';
 import { State } from '@joplin/lib/reducer';
-import CustomButton from '../CustomButton';
+import IconButton from '../IconButton';
 import FolderPicker from '../FolderPicker';
 import { itemIsInTrash } from '@joplin/lib/services/trash';
 import restoreItems from '@joplin/lib/services/trash/restoreItems';
@@ -24,6 +22,11 @@ import { PluginStates } from '@joplin/lib/services/plugins/reducer';
 import { ContainerType } from '@joplin/lib/services/plugins/WebviewController';
 import { Dispatch } from 'redux';
 import WarningBanner from './WarningBanner';
+import WebBetaButton from './WebBetaButton';
+
+import Menu, { MenuOptionType } from './Menu';
+import shim from '@joplin/lib/shim';
+export { MenuOptionType };
 
 // Rather than applying a padding to the whole bar, it is applied to each
 // individual component (button, picker, etc.) so that the touchable areas
@@ -31,14 +34,13 @@ import WarningBanner from './WarningBanner';
 // default height.
 const PADDING_V = 10;
 
-type OnSelectCallbackType=()=> void;
 type OnPressCallback=()=> void;
 
-export interface MenuOptionType {
-	onPress: OnPressCallback;
-	isDivider?: boolean;
-	title: string;
-	disabled?: boolean;
+export interface FolderPickerOptions {
+	enabled: boolean;
+	selectedFolderId?: string;
+	onValueChange?: OnValueChangedListener;
+	mustSelect?: boolean;
 }
 
 interface ScreenHeaderProps {
@@ -46,20 +48,13 @@ interface ScreenHeaderProps {
 	selectedFolderId: string;
 	notesParentType: string;
 	noteSelectionEnabled: boolean;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	parentComponent: any;
 	showUndoButton: boolean;
 	undoButtonDisabled?: boolean;
 	showRedoButton: boolean;
 	menuOptions: MenuOptionType[];
 	title?: string|null;
 	folders: FolderEntity[];
-	folderPickerOptions?: {
-		enabled: boolean;
-		selectedFolderId?: string;
-		onValueChange?: OnValueChangedListener;
-		mustSelect?: boolean;
-	};
+	folderPickerOptions?: FolderPickerOptions;
 	plugins: PluginStates;
 
 	dispatch: Dispatch;
@@ -107,14 +102,8 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 			container: {
 				flexDirection: 'column',
 				backgroundColor: theme.backgroundColor2,
-				alignItems: 'center',
 				shadowColor: '#000000',
 				elevation: 5,
-			},
-			divider: {
-				borderBottomWidth: 1,
-				borderColor: theme.dividerColor,
-				backgroundColor: '#0000ff',
 			},
 			sideMenuButton: {
 				flex: 1,
@@ -166,23 +155,6 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 				color: theme.color2,
 				fontWeight: 'bold',
 			},
-			contextMenu: {
-				backgroundColor: theme.backgroundColor2,
-			},
-			contextMenuItem: {
-				backgroundColor: theme.backgroundColor,
-			},
-			contextMenuItemText: {
-				flex: 1,
-				textAlignVertical: 'center',
-				paddingLeft: theme.marginLeft,
-				paddingRight: theme.marginRight,
-				paddingTop: theme.itemMarginTop,
-				paddingBottom: theme.itemMarginBottom,
-				color: theme.color,
-				backgroundColor: theme.backgroundColor,
-				fontSize: theme.fontSize,
-			},
 			titleText: {
 				flex: 1,
 				textAlignVertical: 'center',
@@ -195,10 +167,6 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 			},
 		};
 
-		styleObject.contextMenuItemTextDisabled = {
-			...styleObject.contextMenuItemText,
-			opacity: 0.5,
-		};
 
 		styleObject.topIcon = { ...theme.icon };
 		styleObject.topIcon.flex = 1;
@@ -284,12 +252,6 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 		}
 	}
 
-	private menu_select(value: OnSelectCallbackType) {
-		if (typeof value === 'function') {
-			value();
-		}
-	}
-
 	public render() {
 		const themeId = this.props.themeId;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -358,26 +320,25 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 		const renderTopButton = (options: TopButtonOptions) => {
 			if (!options.visible) return null;
 
-			const icon = <Icon name={options.iconName} style={this.styles().topIcon} />;
 			const viewStyle = options.disabled ? this.styles().iconButtonDisabled : this.styles().iconButton;
 
 			return (
-				<CustomButton
+				<IconButton
 					onPress={options.onPress}
-					style={{ padding: 0 }}
+					containerStyle={{ padding: 0 }}
+					contentWrapperStyle={viewStyle}
 					themeId={themeId}
 					disabled={!!options.disabled}
 					description={options.description}
-					contentStyle={viewStyle}
-				>
-					{icon}
-				</CustomButton>
+					iconName={options.iconName}
+					iconStyle={this.styles().topIcon}
+				/>
 			);
 		};
 
 		const renderUndoButton = () => {
 			return renderTopButton({
-				iconName: 'arrow-undo-circle-sharp',
+				iconName: 'ionicon arrow-undo-circle-sharp',
 				description: _('Undo'),
 				onPress: this.props.onUndoButtonPress,
 				visible: this.props.showUndoButton,
@@ -387,7 +348,7 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 
 		const renderRedoButton = () => {
 			return renderTopButton({
-				iconName: 'arrow-redo-circle-sharp',
+				iconName: 'ionicon arrow-redo-circle-sharp',
 				description: _('Redo'),
 				onPress: this.props.onRedoButtonPress,
 				visible: this.props.showRedoButton,
@@ -397,55 +358,72 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		function selectAllButton(styles: any, onPress: OnPressCallback) {
 			return (
-				<CustomButton
+				<IconButton
 					onPress={onPress}
 
 					themeId={themeId}
 					description={_('Select all')}
-					contentStyle={styles.iconButton}
-				>
-					<Icon name="checkmark-circle-outline" style={styles.topIcon} />
-				</CustomButton>
+					contentWrapperStyle={styles.iconButton}
+
+					iconName="ionicon checkmark-circle-outline"
+					iconStyle={styles.topIcon}
+				/>
 			);
 		}
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		function searchButton(styles: any, onPress: OnPressCallback) {
 			return (
-				<CustomButton
+				<IconButton
 					onPress={onPress}
 
 					description={_('Search')}
 					themeId={themeId}
-					contentStyle={styles.iconButton}
-				>
-					<Icon name="search" style={styles.topIcon} />
-				</CustomButton>
+					contentWrapperStyle={styles.iconButton}
+
+					iconName='ionicon search'
+					iconStyle={styles.topIcon}
+				/>
 			);
 		}
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		const pluginPanelToggleButton = (styles: any, onPress: OnPressCallback) => {
 			const allPluginViews = Object.values(this.props.plugins).map(plugin => Object.values(plugin.views)).flat();
-			const allPanels = allPluginViews.filter(view => view.containerType === ContainerType.Panel);
-			if (allPanels.length === 0) return null;
+			const allVisiblePanels = allPluginViews.filter(
+				view => view.containerType === ContainerType.Panel && view.opened,
+			);
+			if (allVisiblePanels.length === 0) return null;
 
 			return (
-				<CustomButton
+				<IconButton
 					onPress={onPress}
 					description={_('Plugin panels')}
 					themeId={themeId}
-					contentStyle={styles.iconButton}
-				>
-					<Icon name="extension-puzzle" style={styles.topIcon} />
-				</CustomButton>
+					contentWrapperStyle={styles.iconButton}
+
+					iconName="ionicon extension-puzzle"
+					iconStyle={styles.topIcon}
+				/>
+			);
+		};
+
+		const betaIconButton = () => {
+			if (Platform.OS !== 'web') return null;
+
+			return (
+				<WebBetaButton
+					themeId={themeId}
+					wrapperStyle={this.styles().iconButton}
+					iconStyle={this.styles().topIcon}
+				/>
 			);
 		};
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		function deleteButton(styles: any, onPress: OnPressCallback, disabled: boolean) {
 			return (
-				<CustomButton
+				<IconButton
 					onPress={onPress}
 					disabled={disabled}
 
@@ -454,17 +432,18 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 					accessibilityHint={
 						disabled ? null : _('Delete selected notes')
 					}
-					contentStyle={disabled ? styles.iconButtonDisabled : styles.iconButton}
-				>
-					<Icon name="trash" style={styles.topIcon} />
-				</CustomButton>
+					contentWrapperStyle={disabled ? styles.iconButtonDisabled : styles.iconButton}
+
+					iconName='ionicon trash'
+					iconStyle={styles.topIcon}
+				/>
 			);
 		}
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		function restoreButton(styles: any, onPress: OnPressCallback, disabled: boolean) {
 			return (
-				<CustomButton
+				<IconButton
 					onPress={onPress}
 					disabled={disabled}
 
@@ -473,17 +452,18 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 					accessibilityHint={
 						disabled ? null : _('Restore')
 					}
-					contentStyle={disabled ? styles.iconButtonDisabled : styles.iconButton}
-				>
-					<Icon name="reload-circle" style={styles.topIcon} />
-				</CustomButton>
+					contentWrapperStyle={disabled ? styles.iconButtonDisabled : styles.iconButton}
+
+					iconName='ionicon reload-circle'
+					iconStyle={styles.topIcon}
+				/>
 			);
 		}
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 		function duplicateButton(styles: any, onPress: OnPressCallback, disabled: boolean) {
 			return (
-				<CustomButton
+				<IconButton
 					onPress={onPress}
 					disabled={disabled}
 
@@ -492,10 +472,10 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 					accessibilityHint={
 						disabled ? null : _('Duplicate selected notes')
 					}
-					contentStyle={disabled ? styles.iconButtonDisabled : styles.iconButton}
-				>
-					<Icon name="copy" style={styles.topIcon} />
-				</CustomButton>
+					contentWrapperStyle={disabled ? styles.iconButtonDisabled : styles.iconButton}
+					iconName='ionicon copy'
+					iconStyle={styles.topIcon}
+				/>
 			);
 		}
 
@@ -514,42 +494,27 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 			);
 		}
 
-		let key = 0;
-		const menuOptionComponents = [];
+		const menuOptions: MenuOptionType[] = [...this.props.menuOptions];
 
 		const selectedFolder = this.props.notesParentType === 'Folder' ? Folder.byId(this.props.folders, this.props.selectedFolderId) : null;
 		const selectedFolderInTrash = itemIsInTrash(selectedFolder);
 
 		if (!this.props.noteSelectionEnabled) {
-			for (let i = 0; i < this.props.menuOptions.length; i++) {
-				const o = this.props.menuOptions[i];
-
-				if (o.isDivider) {
-					menuOptionComponents.push(<View key={`menuOption_${key++}`} style={this.styles().divider} />);
-				} else {
-					menuOptionComponents.push(
-						<MenuOption value={o.onPress} key={`menuOption_${key++}`} style={this.styles().contextMenuItem} disabled={!!o.disabled}>
-							<Text style={o.disabled ? this.styles().contextMenuItemTextDisabled : this.styles().contextMenuItemText}>{o.title}</Text>
-						</MenuOption>,
-					);
-				}
-			}
-
-			if (menuOptionComponents.length) {
-				menuOptionComponents.push(<View key={`menuOption_${key++}`} style={this.styles().divider} />);
+			if (menuOptions.length) {
+				menuOptions.push({ isDivider: true });
 			}
 		} else {
-			menuOptionComponents.push(
-				<MenuOption value={() => this.deleteButton_press()} key={'menuOption_delete'} style={this.styles().contextMenuItem}>
-					<Text style={this.styles().contextMenuItemText}>{_('Delete')}</Text>
-				</MenuOption>,
-			);
+			menuOptions.push({
+				key: 'delete',
+				title: _('Delete'),
+				onPress: this.deleteButton_press,
+			});
 
-			menuOptionComponents.push(
-				<MenuOption value={() => this.duplicateButton_press()} key={'menuOption_duplicate'} style={this.styles().contextMenuItem}>
-					<Text style={this.styles().contextMenuItemText}>{_('Duplicate')}</Text>
-				</MenuOption>,
-			);
+			menuOptions.push({
+				key: 'duplicate',
+				title: _('Duplicate'),
+				onPress: this.duplicateButton_press,
+			});
 		}
 
 		const createTitleComponent = (disabled: boolean, hideableAfterTitleComponents: ReactElement) => {
@@ -577,7 +542,7 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 
 							const folder = await Folder.load(folderId);
 
-							const ok = noteIds.length > 1 ? await dialogs.confirm(this.props.parentComponent, _('Move %d notes to notebook "%s"?', noteIds.length, folder.title)) : true;
+							const ok = noteIds.length > 1 ? await shim.showConfirmationDialog(_('Move %d notes to notebook "%s"?', noteIds.length, folder.title)) : true;
 							if (!ok) return;
 
 							this.props.dispatch({ type: 'NOTE_SELECTION_END' });
@@ -619,6 +584,7 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 		const sideMenuComp = !showSideMenuButton ? null : sideMenuButton(this.styles(), () => this.sideMenuButton_press());
 		const backButtonComp = !showBackButton ? null : backButton(this.styles(), () => this.backButton_press(), backButtonDisabled);
 		const pluginPanelsComp = pluginPanelToggleButton(this.styles(), () => this.pluginPanelToggleButton_press());
+		const betaIconComp = betaIconButton();
 		const selectAllButtonComp = !showSelectAllButton ? null : selectAllButton(this.styles(), () => this.selectAllButton_press());
 		const searchButtonComp = !showSearchButton ? null : searchButton(this.styles(), () => this.searchButton_press());
 		const deleteButtonComp = !selectedFolderInTrash && this.props.noteSelectionEnabled ? deleteButton(this.styles(), () => this.deleteButton_press(), headerItemDisabled) : null;
@@ -628,10 +594,12 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 
 		// To allow the notebook dropdown (and perhaps other components) to have sufficient
 		// space while in use, we allow certain buttons to be hidden.
-		const hideableRightComponents = pluginPanelsComp;
+		const hideableRightComponents = <>
+			{pluginPanelsComp}
+			{betaIconComp}
+		</>;
 
 		const titleComp = createTitleComponent(headerItemDisabled, hideableRightComponents);
-		const windowHeight = Dimensions.get('window').height - 50;
 
 		const contextMenuStyle: ViewStyle = {
 			paddingTop: PADDING_V,
@@ -642,16 +610,11 @@ class ScreenHeaderComponent extends PureComponent<ScreenHeaderProps, ScreenHeade
 		if (this.props.noteSelectionEnabled) contextMenuStyle.width = 1;
 
 		const menuComp =
-			!menuOptionComponents.length || !showContextMenuButton ? null : (
-				<Menu onSelect={value => this.menu_select(value)} style={this.styles().contextMenu}>
-					<MenuTrigger style={contextMenuStyle}>
-						<View accessibilityLabel={_('Actions')}>
-							<Icon name="ellipsis-vertical" style={this.styles().contextMenuTrigger} />
-						</View>
-					</MenuTrigger>
-					<MenuOptions>
-						<ScrollView style={{ maxHeight: windowHeight }}>{menuOptionComponents}</ScrollView>
-					</MenuOptions>
+			!menuOptions.length || !showContextMenuButton ? null : (
+				<Menu themeId={this.props.themeId} options={menuOptions}>
+					<View style={contextMenuStyle} accessibilityLabel={_('Actions')}>
+						<Icon name="ellipsis-vertical" style={this.styles().contextMenuTrigger} />
+					</View>
 				</Menu>
 			);
 

@@ -4,8 +4,8 @@ import shim from './shim';
 const { setupProxySettings } = require('./shim-init-node');
 import BaseService from './services/BaseService';
 import reducer, { getNotesParent, serializeNotesParent, setStore, State } from './reducer';
-import KeychainServiceDriver from './services/keychain/KeychainServiceDriver.node';
-import KeychainServiceDriverDummy from './services/keychain/KeychainServiceDriver.dummy';
+import KeychainServiceDriverNode from './services/keychain/KeychainServiceDriver.node';
+import KeychainServiceDriverElectron from './services/keychain/KeychainServiceDriver.electron';
 import { setLocale } from './locale';
 import KvStore from './services/KvStore';
 import SyncTargetJoplinServer from './SyncTargetJoplinServer';
@@ -21,6 +21,7 @@ import BaseItem from './models/BaseItem';
 import Note from './models/Note';
 import Tag from './models/Tag';
 import { splitCommandString } from '@joplin/utils';
+import { setDateFormat, setTimeFormat, setTimeLocale } from '@joplin/utils/time';
 import { reg } from './registry';
 import time from './time';
 import BaseSyncTarget from './BaseSyncTarget';
@@ -30,7 +31,7 @@ import fs = require('fs-extra');
 const EventEmitter = require('events');
 const syswidecas = require('./vendor/syswide-cas');
 import SyncTargetRegistry from './SyncTargetRegistry';
-const SyncTargetFilesystem = require('./SyncTargetFilesystem.js');
+import SyncTargetFilesystem from './SyncTargetFilesystem';
 const SyncTargetNextcloud = require('./SyncTargetNextcloud.js');
 const SyncTargetWebDAV = require('./SyncTargetWebDAV.js');
 const SyncTargetDropbox = require('./SyncTargetDropbox.js');
@@ -357,6 +358,9 @@ export default class BaseApplication {
 		const sideEffects: any = {
 			'dateFormat': async () => {
 				time.setLocale(Setting.value('locale'));
+				setTimeLocale(Setting.value('locale'));
+				setDateFormat(Setting.value('dateFormat'));
+				setTimeFormat(Setting.value('timeFormat'));
 				time.setDateFormat(Setting.value('dateFormat'));
 				time.setTimeFormat(Setting.value('timeFormat'));
 			},
@@ -575,10 +579,10 @@ export default class BaseApplication {
 		if (doRefreshFolders) {
 			if (doRefreshFolders === 'now') {
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-				await refreshFolders((action: any) => this.dispatch(action));
+				await refreshFolders((action: any) => this.dispatch(action), newState.selectedFolderId);
 			} else {
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-				await scheduleRefreshFolders((action: any) => this.dispatch(action));
+				await scheduleRefreshFolders((action: any) => this.dispatch(action), newState.selectedFolderId);
 			}
 		}
 		return result;
@@ -683,7 +687,7 @@ export default class BaseApplication {
 		const tempDir = `${profileDir}/tmp`;
 		const cacheDir = `${profileDir}/cache`;
 
-		Setting.setConstant('env', initArgs.env);
+		Setting.setConstant('env', initArgs.env as Env);
 		Setting.setConstant('resourceDirName', resourceDirName);
 		Setting.setConstant('resourceDir', resourceDir);
 		Setting.setConstant('tempDir', tempDir);
@@ -750,10 +754,13 @@ export default class BaseApplication {
 
 		reg.setDb(this.database_);
 		BaseModel.setDb(this.database_);
+		KvStore.instance().setDb(reg.db());
 
 		setRSA(RSA);
 
-		await loadKeychainServiceAndSettings(options.keychainEnabled ? KeychainServiceDriver : KeychainServiceDriverDummy);
+		await loadKeychainServiceAndSettings(
+			options.keychainEnabled ? [KeychainServiceDriverElectron, KeychainServiceDriverNode] : [],
+		);
 		await migrateMasterPassword();
 		await handleSyncStartupOperation();
 
@@ -785,12 +792,12 @@ export default class BaseApplication {
 			Setting.skipDefaultMigrations();
 
 			if (Setting.value('env') === 'dev') {
-				Setting.setValue('showTrayIcon', 0);
-				Setting.setValue('autoUpdateEnabled', 0);
+				Setting.setValue('showTrayIcon', false);
+				Setting.setValue('autoUpdateEnabled', false);
 				Setting.setValue('sync.interval', 3600);
 			}
 
-			Setting.setValue('firstStart', 0);
+			Setting.setValue('firstStart', false);
 		} else {
 			Setting.applyDefaultMigrations();
 			Setting.applyUserSettingMigration();
@@ -837,7 +844,6 @@ export default class BaseApplication {
 
 		BaseItem.revisionService_ = RevisionService.instance();
 
-		KvStore.instance().setDb(reg.db());
 
 		BaseItem.encryptionService_ = EncryptionService.instance();
 		BaseItem.shareService_ = ShareService.instance();

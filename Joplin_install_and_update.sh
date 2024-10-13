@@ -28,6 +28,7 @@ SILENT=false
 ALLOW_ROOT=false
 SHOW_CHANGELOG=false
 INCLUDE_PRE_RELEASE=false
+INSTALL_DIR="${HOME}/.joplin"   # default installation directory
 
 print() {
   if [[ "${SILENT}" == false ]]; then
@@ -57,6 +58,7 @@ showHelp() {
   print "\t" "--force" "\t" "Always download the latest version"
   print "\t" "--silent" "\t" "Don't print any output"
   print "\t" "--prerelease" "\t" "Check for new Versions including Pre-Releases"
+  print "\t" "--install-dir" "\t" "Set installation directory; default: \"${INSTALL_DIR}\""
 
   if [[ ! -z $1 ]]; then
     print "\n" "${COLOR_RED}ERROR: " "$*" "${COLOR_RESET}" "\n"
@@ -84,6 +86,7 @@ while getopts "${optspec}" OPT; do
     force )        FORCE=true ;;
     changelog )    SHOW_CHANGELOG=true ;;
     prerelease )   INCLUDE_PRE_RELEASE=true ;;
+    install-dir )  INSTALL_DIR="$OPTARG" ;;
     [^\?]* )       showHelp "Illegal option --${OPT}"; exit 2 ;;
     \? )           showHelp "Illegal option -${OPTARG}"; exit 2 ;;
   esac
@@ -120,9 +123,10 @@ fi
 print "Checking dependencies..."
 ## Check if libfuse2 is present.
 if [[ $(command -v ldconfig) ]]; then
-	LIBFUSE=$(ldconfig -p | grep "libfuse.so.2" || echo '')
-else
-	LIBFUSE=$(find /lib /usr/lib /lib64 /usr/lib64 /usr/local/lib -name "libfuse.so.2" 2>/dev/null | grep "libfuse.so.2" || echo '')
+  LIBFUSE=$(ldconfig -p | grep "libfuse.so.2" || echo '')
+fi
+if [[ $LIBFUSE == "" ]]; then
+  LIBFUSE=$(find /lib /usr/lib /lib64 /usr/lib64 /usr/local/lib -name "libfuse.so.2" 2>/dev/null | grep "libfuse.so.2" || echo '')
 fi
 if [[ $LIBFUSE == "" ]]; then
   print "${COLOR_RED}Error: Can't get libfuse2 on system, please install libfuse2${COLOR_RESET}"
@@ -142,17 +146,17 @@ else
 fi
 
 # Check if it's in the latest version
-if [[ -e ~/.joplin/VERSION ]] && [[ $(< ~/.joplin/VERSION) == "${RELEASE_VERSION}" ]]; then
+if [[ -e "${INSTALL_DIR}/VERSION" ]] && [[ $(< "${INSTALL_DIR}/VERSION") == "${RELEASE_VERSION}" ]]; then
   print "${COLOR_GREEN}You already have the latest version${COLOR_RESET} ${RELEASE_VERSION} ${COLOR_GREEN}installed.${COLOR_RESET}"
   ([[ "$FORCE" == true ]] && print "Forcing installation...") || exit 0
 else
-  [[ -e ~/.joplin/VERSION ]] && CURRENT_VERSION=$(< ~/.joplin/VERSION)
+  [[ -e "${INSTALL_DIR}/VERSION" ]] && CURRENT_VERSION=$(< "${INSTALL_DIR}/VERSION")
   print "The latest version is ${RELEASE_VERSION}, but you have ${CURRENT_VERSION:-no version} installed."
 fi
 
 # Check if it's an update or a new install
 DOWNLOAD_TYPE="New"
-if [[ -f ~/.joplin/Joplin.AppImage ]]; then
+if [[ -f "${INSTALL_DIR}/Joplin.AppImage" ]]; then
   DOWNLOAD_TYPE="Update"
 fi
 
@@ -165,16 +169,16 @@ wget -O "${TEMP_DIR}/joplin.png" https://joplinapp.org/images/Icon512.png
 #-----------------------------------------------------
 print 'Installing Joplin...'
 # Delete previous version (in future versions joplin.desktop shouldn't exist)
-rm -f ~/.joplin/*.AppImage ~/.local/share/applications/joplin.desktop ~/.joplin/VERSION
+rm -f "${INSTALL_DIR}"/*.AppImage ~/.local/share/applications/joplin.desktop "${INSTALL_DIR}/VERSION"
 
 # Creates the folder where the binary will be stored
-mkdir -p ~/.joplin/
+mkdir -p "${INSTALL_DIR}/"
 
 # Download the latest version
-mv "${TEMP_DIR}/Joplin.AppImage" ~/.joplin/Joplin.AppImage
+mv "${TEMP_DIR}/Joplin.AppImage" "${INSTALL_DIR}/Joplin.AppImage"
 
 # Gives execution privileges
-chmod +x ~/.joplin/Joplin.AppImage
+chmod +x "${INSTALL_DIR}/Joplin.AppImage"
 
 print "${COLOR_GREEN}OK${COLOR_RESET}"
 
@@ -202,16 +206,28 @@ if command -v lsb_release &> /dev/null; then
   DISTVER=$(lsb_release -is) && DISTVER=$DISTVER$(lsb_release -rs)
   DISTCODENAME=$(lsb_release -cs)
   DISTMAJOR=$(lsb_release -rs|cut -d. -f1)
+
   #-----------------------------------------------------
   # Check for "The SUID sandbox helper binary was found, but is not configured correctly" problem.
   # It is present in Debian 1X. A (temporary) patch will be applied at .desktop file
   # Linux Mint 4 Debbie is based on Debian 10 and requires the same param handling.
   #
-  # This also works around Ubuntu 23.10+'s restrictions on unprivileged user namespaces. Electron
+  # TODO: Remove: This is likely no longer an issue. See https://issues.chromium.org/issues/40462640.
+  BAD_HELPER_BINARY=false
+  if [[ $DISTVER =~ Debian1. || ( "$DISTVER" = "Linuxmint4" && "$DISTCODENAME" = "debbie" ) || ( "$DISTVER" = "CentOS" && "$DISTMAJOR" =~ 6|7 ) ]]; then
+    BAD_HELPER_BINARY=true
+  fi
+
+  # Work around Ubuntu 23.10+'s restrictions on unprivileged user namespaces. Electron
   # uses these to sandbox processes. Unfortunately, it doesn't look like we can get around this
   # without writing the AppImage to a non-user-writable location (without invalidating other security
   # controls). See https://discourse.joplinapp.org/t/possible-future-requirement-for-no-sandbox-flag-for-ubuntu-23-10/.
-  if [[ $DISTVER = "Ubuntu23.10" || $DISTVER =~ Debian1. || ( "$DISTVER" = "Linuxmint4" && "$DISTCODENAME" = "debbie" ) || ( "$DISTVER" = "CentOS" && "$DISTMAJOR" =~ 6|7 ) ]]; then
+  HAS_USERNS_RESTRICTIONS=false
+  if [[ "$DISTVER" =~ ^Ubuntu && $DISTMAJOR -ge 23 ]]; then
+    HAS_USERNS_RESTRICTIONS=true
+  fi
+
+  if [[ $HAS_USERNS_RESTRICTIONS = true || $BAD_HELPER_BINARY = true ]]; then
     SANDBOXPARAM="--no-sandbox"
     print "${COLOR_YELLOW}WARNING${COLOR_RESET} Electron sandboxing disabled."
     print "    See https://discourse.joplinapp.org/t/32160/5 for details."
@@ -241,7 +257,7 @@ if [[ $DESKTOP =~ .*gnome.*|.*kde.*|.*xfce.*|.*mate.*|.*lxqt.*|.*unity.*|.*x-cin
 Encoding=UTF-8
 Name=Joplin
 Comment=Joplin for Desktop
-Exec=${HOME}/.joplin/Joplin.AppImage ${SANDBOXPARAM} %u
+Exec=env APPIMAGELAUNCHER_DISABLE=TRUE "${INSTALL_DIR}/Joplin.AppImage" ${SANDBOXPARAM} %u
 Icon=joplin
 StartupWMClass=Joplin
 Type=Application
@@ -266,7 +282,7 @@ fi
 print "${COLOR_GREEN}Joplin version${COLOR_RESET} ${RELEASE_VERSION} ${COLOR_GREEN}installed.${COLOR_RESET}"
 
 # Record version
-echo "$RELEASE_VERSION" > ~/.joplin/VERSION
+echo "$RELEASE_VERSION" > "${INSTALL_DIR}/VERSION"
 
 #-----------------------------------------------------
 if [[ "$SHOW_CHANGELOG" == true ]]; then

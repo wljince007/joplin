@@ -3,19 +3,18 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import TinyMCE from './NoteBody/TinyMCE/TinyMCE';
 import { connect } from 'react-redux';
 import MultiNoteActions from '../MultiNoteActions';
-import { htmlToMarkdown, formNoteToNote } from './utils';
+import { htmlToMarkdown } from './utils';
 import useSearchMarkers from './utils/useSearchMarkers';
 import useNoteSearchBar from './utils/useNoteSearchBar';
 import useMessageHandler from './utils/useMessageHandler';
 import useWindowCommandHandler from './utils/useWindowCommandHandler';
 import useDropHandler from './utils/useDropHandler';
 import useMarkupToHtml from './utils/useMarkupToHtml';
-import useFormNote, { OnLoadEvent } from './utils/useFormNote';
+import useFormNote, { OnLoadEvent, OnSetFormNote } from './utils/useFormNote';
 import useEffectiveNoteId from './utils/useEffectiveNoteId';
 import useFolder from './utils/useFolder';
 import styles_ from './styles';
-import { NoteEditorProps, FormNote, ScrollOptions, ScrollOptionTypes, OnChangeEvent, NoteBodyEditorProps, AllAssetsOptions, NoteBodyEditorRef } from './utils/types';
-import ResourceEditWatcher from '@joplin/lib/services/ResourceEditWatcher/index';
+import { NoteEditorProps, FormNote, OnChangeEvent, NoteBodyEditorProps, AllAssetsOptions, NoteBodyEditorRef } from './utils/types';
 import CommandService from '@joplin/lib/services/CommandService';
 import ToolbarButton from '../ToolbarButton/ToolbarButton';
 import Button, { ButtonLevel } from '../Button/Button';
@@ -26,7 +25,6 @@ import { _, _n } from '@joplin/lib/locale';
 import TagList from '../TagList';
 import NoteTitleBar from './NoteTitle/NoteTitleBar';
 import markupLanguageUtils from '../../utils/markupLanguageUtils';
-import usePrevious from '../hooks/usePrevious';
 import Setting from '@joplin/lib/models/Setting';
 import stateToWhenClauseContext from '../../services/commands/stateToWhenClauseContext';
 import ExternalEditWatcher from '@joplin/lib/services/ExternalEditWatcher';
@@ -37,7 +35,6 @@ import NoteSearchBar from '../NoteSearchBar';
 import { reg } from '@joplin/lib/registry';
 import Note from '@joplin/lib/models/Note';
 import Folder from '@joplin/lib/models/Folder';
-const bridge = require('@electron/remote').require('./bridge').default;
 import NoteRevisionViewer from '../NoteRevisionViewer';
 import { parseShareCache } from '@joplin/lib/services/share/reducer';
 import useAsyncEffect from '@joplin/lib/hooks/useAsyncEffect';
@@ -51,6 +48,10 @@ import CodeMirror5 from './NoteBody/CodeMirror/v5/CodeMirror';
 import { openItemById } from './utils/contextMenu';
 import getPluginSettingValue from '@joplin/lib/services/plugins/utils/getPluginSettingValue';
 import { MarkupLanguage } from '@joplin/renderer';
+import useScrollWhenReadyOptions from './utils/useScrollWhenReadyOptions';
+import useScheduleSaveCallbacks from './utils/useScheduleSaveCallbacks';
+import WarningBanner from './WarningBanner/WarningBanner';
+const debounce = require('debounce');
 
 const commands = [
 	require('./commands/showRevisions'),
@@ -61,20 +62,21 @@ const toolbarButtonUtils = new ToolbarButtonUtils(CommandService.instance());
 function NoteEditor(props: NoteEditorProps) {
 	const [showRevisions, setShowRevisions] = useState(false);
 	const [titleHasBeenManuallyChanged, setTitleHasBeenManuallyChanged] = useState(false);
-	const [scrollWhenReady, setScrollWhenReady] = useState<ScrollOptions>(null);
 	const [isReadOnly, setIsReadOnly] = useState<boolean>(false);
 
 	const editorRef = useRef<NoteBodyEditorRef>();
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	const titleInputRef = useRef<any>();
+	const titleInputRef = useRef<HTMLInputElement>();
 	const isMountedRef = useRef(true);
 	const noteSearchBarRef = useRef(null);
 
+	const setFormNoteRef = useRef<OnSetFormNote>();
+	const { saveNoteIfWillChange, scheduleSaveNote } = useScheduleSaveCallbacks({
+		setFormNote: setFormNoteRef, dispatch: props.dispatch, editorRef,
+	});
 	const formNote_beforeLoad = useCallback(async (event: OnLoadEvent) => {
 		await saveNoteIfWillChange(event.formNote);
 		setShowRevisions(false);
-		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
-	}, []);
+	}, [saveNoteIfWillChange]);
 
 	const formNote_afterLoad = useCallback(async () => {
 		setTitleHasBeenManuallyChanged(false);
@@ -92,7 +94,7 @@ function NoteEditor(props: NoteEditorProps) {
 		onBeforeLoad: formNote_beforeLoad,
 		onAfterLoad: formNote_afterLoad,
 	});
-
+	setFormNoteRef.current = setFormNote;
 	const formNoteRef = useRef<FormNote>();
 	formNoteRef.current = { ...formNote };
 
@@ -116,53 +118,6 @@ function NoteEditor(props: NoteEditorProps) {
 
 	const styles = styles_(props);
 
-	function scheduleSaveNote(formNote: FormNote) {
-		if (!formNote.saveActionQueue) throw new Error('saveActionQueue is not set!!'); // Sanity check
-
-		// reg.logger().debug('Scheduling...', formNote);
-
-		const makeAction = (formNote: FormNote) => {
-			return async function() {
-				const note = await formNoteToNote(formNote);
-				reg.logger().debug('Saving note...', note);
-				const savedNote = await Note.save(note);
-
-				setFormNote((prev: FormNote) => {
-					return { ...prev, user_updated_time: savedNote.user_updated_time, hasChanged: false };
-				});
-
-				void ExternalEditWatcher.instance().updateNoteFile(savedNote);
-
-				props.dispatch({
-					type: 'EDITOR_NOTE_STATUS_REMOVE',
-					id: formNote.id,
-				});
-
-				eventManager.emit(EventName.NoteContentChange, { note: savedNote });
-			};
-		};
-
-		formNote.saveActionQueue.push(makeAction(formNote));
-	}
-
-	async function saveNoteIfWillChange(formNote: FormNote) {
-		if (!formNote.id || !formNote.bodyWillChangeId) return;
-
-		const body = await editorRef.current.content();
-
-		scheduleSaveNote({
-			...formNote,
-			body: body,
-			bodyWillChangeId: 0,
-			bodyChangeId: 0,
-		});
-	}
-
-	async function saveNoteAndWait(formNote: FormNote) {
-		await saveNoteIfWillChange(formNote);
-		return formNote.saveActionQueue.waitForAllDone();
-	}
-
 	const whiteBackgroundNoteRendering = formNote.markup_language === MarkupLanguage.Html;
 
 	const markupToHtml = useMarkupToHtml({
@@ -183,7 +138,7 @@ function NoteEditor(props: NoteEditorProps) {
 		const theme = themeStyle(options.themeId ? options.themeId : props.themeId);
 
 		const markupToHtml = markupLanguageUtils.newMarkupToHtml({}, {
-			resourceBaseUrl: `file://${Setting.value('resourceDir')}/`,
+			resourceBaseUrl: `joplin-content://note-viewer/${Setting.value('resourceDir')}/`,
 			customCss: props.customCss,
 		});
 
@@ -201,29 +156,18 @@ function NoteEditor(props: NoteEditorProps) {
 				id: formNote.id,
 			});
 		}
-		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
-	}, [props.isProvisional, formNote.id]);
+	}, [props.isProvisional, formNote.id, props.dispatch]);
 
-	const previousNoteId = usePrevious(formNote.id);
-
-	useEffect(() => {
-		if (formNote.id === previousNoteId) return;
-
-		if (editorRef.current) {
-			editorRef.current.resetScroll();
-		}
-
-		setScrollWhenReady({
-			type: props.selectedNoteHash ? ScrollOptionTypes.Hash : ScrollOptionTypes.Percent,
-			value: props.selectedNoteHash ? props.selectedNoteHash : props.lastEditorScrollPercents[formNote.id] || 0,
-		});
-
-		void ResourceEditWatcher.instance().stopWatchingAll();
-		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
-	}, [formNote.id, previousNoteId]);
+	const scheduleNoteListResort = useMemo(() => {
+		return debounce(() => {
+			// Although the note list will update automatically, it may take some time. This
+			// forces an immediate update.
+			props.dispatch({ type: 'NOTE_SORT' });
+		}, 100);
+	}, [props.dispatch]);
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	const onFieldChange = useCallback((field: string, value: any, changeId = 0) => {
+	const onFieldChange = useCallback(async (field: string, value: any, changeId = 0) => {
 		if (!isMountedRef.current) {
 			// When the component is unmounted, various actions can happen which can
 			// trigger onChange events, for example the textarea might be cleared.
@@ -263,21 +207,16 @@ function NoteEditor(props: NoteEditorProps) {
 			// The previously loaded note, that was modified, will be saved via saveNoteIfWillChange()
 		} else {
 			setFormNote(newNote);
-			scheduleSaveNote(newNote);
+			await scheduleSaveNote(newNote);
 		}
-		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
-	}, [handleProvisionalFlag, formNote, isNewNote, titleHasBeenManuallyChanged]);
 
-	useWindowCommandHandler({
-		dispatch: props.dispatch,
-		formNote,
-		setShowLocalSearch,
-		noteSearchBarRef,
-		editorRef,
-		titleInputRef,
-		saveNoteAndWait,
-		setFormNote,
-	});
+		if (field === 'title') {
+			// Scheduling a resort needs to be:
+			// - called after scheduleSaveNote so that the new note title is used for sorting
+			// - debounced because many calls to scheduleSaveNote can resolve at once
+			scheduleNoteListResort();
+		}
+	}, [handleProvisionalFlag, formNote, setFormNote, isNewNote, titleHasBeenManuallyChanged, scheduleNoteListResort, scheduleSaveNote]);
 
 	const onDrop = useDropHandler({ editorRef });
 
@@ -285,6 +224,15 @@ function NoteEditor(props: NoteEditorProps) {
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	const onTitleChange = useCallback((event: any) => onFieldChange('title', event.target.value), [onFieldChange]);
+
+	useWindowCommandHandler({
+		dispatch: props.dispatch,
+		setShowLocalSearch,
+		noteSearchBarRef,
+		editorRef,
+		titleInputRef,
+		onBodyChange,
+	});
 
 	// const onTitleKeydown = useCallback((event:any) => {
 	// 	const keyCode = event.keyCode;
@@ -339,10 +287,15 @@ function NoteEditor(props: NoteEditorProps) {
 			id: formNote.id,
 			status: 'saving',
 		});
-		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
-	}, [formNote, handleProvisionalFlag]);
+	}, [formNote, setFormNote, handleProvisionalFlag, props.dispatch]);
 
-	const onMessage = useMessageHandler(scrollWhenReady, setScrollWhenReady, editorRef, setLocalSearchResultCount, props.dispatch, formNote, htmlToMarkdown, markupToHtml);
+	const { scrollWhenReady, clearScrollWhenReady } = useScrollWhenReadyOptions({
+		noteId: formNote.id,
+		selectedNoteHash: props.selectedNoteHash,
+		lastEditorScrollPercents: props.lastEditorScrollPercents,
+		editorRef,
+	});
+	const onMessage = useMessageHandler(scrollWhenReady, clearScrollWhenReady, editorRef, setLocalSearchResultCount, props.dispatch, formNote, htmlToMarkdown, markupToHtml);
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	const externalEditWatcher_noteChange = useCallback((event: any) => {
@@ -355,8 +308,7 @@ function NoteEditor(props: NoteEditorProps) {
 
 			setFormNote(newFormNote);
 		}
-		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
-	}, [formNote]);
+	}, [formNote, setFormNote]);
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	const onNotePropertyChange = useCallback((event: any) => {
@@ -373,8 +325,7 @@ function NoteEditor(props: NoteEditorProps) {
 
 			return newFormNote;
 		});
-		// eslint-disable-next-line @seiyab/react-hooks/exhaustive-deps -- Old code before rule was applied
-	}, []);
+	}, [setFormNote]);
 
 	useEffect(() => {
 		eventManager.on(EventName.AlarmChange, onNotePropertyChange);
@@ -409,8 +360,7 @@ function NoteEditor(props: NoteEditorProps) {
 		});
 	}, [props.dispatch]);
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	function renderNoNotes(rootStyle: any) {
+	function renderNoNotes(rootStyle: React.CSSProperties) {
 		const emptyDivStyle = {
 			backgroundColor: 'black',
 			opacity: 0.1,
@@ -461,6 +411,9 @@ function NoteEditor(props: NoteEditorProps) {
 		noteToolbar: null,
 		onScroll: onScroll,
 		setLocalSearchResultCount: setLocalSearchResultCount,
+		setLocalSearch: localSearch_change,
+		setShowLocalSearch,
+		useLocalSearch: showLocalSearch,
 		searchMarkers: searchMarkers,
 		visiblePanes: props.noteVisiblePanes || ['editor', 'viewer'],
 		keyboardMode: Setting.value('editor.keyboardMode'),
@@ -484,29 +437,13 @@ function NoteEditor(props: NoteEditorProps) {
 		editor = <TinyMCE {...editorProps}/>;
 	} else if (props.bodyEditor === 'PlainText') {
 		editor = <PlainEditor {...editorProps}/>;
-	} else if (props.bodyEditor === 'CodeMirror') {
+	} else if (props.bodyEditor === 'CodeMirror5') {
 		editor = <CodeMirror5 {...editorProps}/>;
 	} else if (props.bodyEditor === 'CodeMirror6') {
 		editor = <CodeMirror6 {...editorProps}/>;
 	} else {
 		throw new Error(`Invalid editor: ${props.bodyEditor}`);
 	}
-
-	const onRichTextReadMoreLinkClick = useCallback(() => {
-		bridge().openExternal('https://joplinapp.org/help/apps/rich_text_editor');
-	}, []);
-
-	const onRichTextDismissLinkClick = useCallback(() => {
-		Setting.setValue('richTextBannerDismissed', true);
-	}, []);
-
-	const wysiwygBanner = props.bodyEditor !== 'TinyMCE' || props.richTextBannerDismissed ? null : (
-		<div style={styles.warningBanner}>
-			{_('This Rich Text editor has a number of limitations and it is recommended to be aware of them before using it.')}
-			&nbsp;&nbsp;<a onClick={onRichTextReadMoreLinkClick} style={styles.warningBannerLink} href="#">[ {_('Read more about it')} ]</a>
-			&nbsp;&nbsp;<a onClick={onRichTextDismissLinkClick} style={styles.warningBannerLink} href="#">[ {_('Dismiss')} ]</a>
-		</div>
-	);
 
 	const noteRevisionViewer_onBack = useCallback(() => {
 		setShowRevisions(false);
@@ -521,8 +458,7 @@ function NoteEditor(props: NoteEditorProps) {
 	if (showRevisions) {
 		const theme = themeStyle(props.themeId);
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		const revStyle: any = {
+		const revStyle: React.CSSProperties = {
 			// ...props.style,
 			display: 'inline-flex',
 			padding: theme.margin,
@@ -573,6 +509,7 @@ function NoteEditor(props: NoteEditorProps) {
 				onPrevious={localSearch_previous}
 				onClose={localSearch_close}
 				visiblePanes={props.noteVisiblePanes}
+				editorType={props.bodyEditor}
 			/>
 		);
 	}
@@ -663,7 +600,7 @@ function NoteEditor(props: NoteEditorProps) {
 					{renderTagButton()}
 					{renderTagBar()}
 				</div>
-				{wysiwygBanner}
+				<WarningBanner bodyEditor={props.bodyEditor}/>
 			</div>
 		</div>
 	);
@@ -687,7 +624,6 @@ const mapStateToProps = (state: AppState) => {
 		syncStarted: state.syncStarted,
 		decryptionStarted: state.decryptionWorker?.state !== 'idle',
 		themeId: state.settings.theme,
-		richTextBannerDismissed: state.settings.richTextBannerDismissed,
 		watchedNoteFiles: state.watchedNoteFiles,
 		notesParentType: state.notesParentType,
 		selectedNoteTags: state.selectedNoteTags,

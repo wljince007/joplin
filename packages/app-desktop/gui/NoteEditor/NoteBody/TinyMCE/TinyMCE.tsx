@@ -32,11 +32,14 @@ import markupRenderOptions from '../../utils/markupRenderOptions';
 import { DropHandler } from '../../utils/useDropHandler';
 import Logger from '@joplin/utils/Logger';
 import useWebViewApi from './utils/useWebViewApi';
+import useLinkTooltips from './utils/useLinkTooltips';
 import { focus } from '@joplin/lib/utils/focusHandler';
 const md5 = require('md5');
 const { clipboard } = require('electron');
 const supportedLocales = require('./supportedLocales');
-import { isLink } from '@joplin/utils/url';
+import { hasProtocol } from '@joplin/utils/url';
+import useTabIndenter from './utils/useTabIndenter';
+import useKeyboardRefocusHandler from './utils/useKeyboardRefocusHandler';
 
 const logger = Logger.create('TinyMCE');
 
@@ -127,6 +130,8 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 
 	usePluginServiceRegistration(ref);
 	useContextMenu(editor, props.plugins, props.dispatch, props.htmlToMarkdown, props.markupToHtml);
+	useTabIndenter(editor);
+	useKeyboardRefocusHandler(editor);
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	const dispatchDidUpdate = (editor: any) => {
@@ -215,6 +220,13 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 					editor.insertContent(result.html);
 				} else if (cmd.name === 'editor.focus') {
 					focus('TinyMCE::editor.focus', editor);
+					if (cmd.value?.moveCursorToStart) {
+						editor.selection.placeCaretAt(0, 0);
+						editor.selection.setCursorLocation(
+							editor.dom.root,
+							0,
+						);
+					}
 				} else if (cmd.name === 'editor.execCommand') {
 					if (!('ui' in cmd.value)) cmd.value.ui = false;
 					if (!('value' in cmd.value)) cmd.value.value = null;
@@ -363,6 +375,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 	}, []);
 
 	useWebViewApi(editor);
+	const { resetModifiedTitles: resetLinkTooltips } = useLinkTooltips(editor);
 
 	useEffect(() => {
 		const theme = themeStyle(props.themeId);
@@ -396,6 +409,20 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 			.tox .tox-dialog__body-content,
 			.tox .tox-collection__item {
 				color: ${theme.color};
+			}
+
+			.tox .tox-dialog__body-nav-item {
+				color: ${theme.color};
+			}
+
+			.tox .tox-dialog__body-nav-item[aria-selected=true] {
+				color: ${theme.color3};
+				border-color: ${theme.color3};
+				background-color: ${theme.backgroundColor3};
+			}
+
+			.tox .tox-checkbox__icons .tox-checkbox-icon__unchecked svg {
+				fill: ${theme.color};
 			}
 
 			.tox .tox-collection--list .tox-collection__item--active {
@@ -627,6 +654,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 				icons_url: 'gui/NoteEditor/NoteBody/TinyMCE/icons.js',
 				plugins: 'noneditable link joplinLists hr searchreplace codesample table',
 				noneditable_noneditable_class: 'joplin-editable', // Can be a regex too
+				iframe_aria_text: _('Rich Text editor. Press Escape then Tab to escape focus.'),
 
 				// #p: Pad empty paragraphs with &nbsp; to prevent them from being removed.
 				// *[*]: Allow all elements and attributes -- we already filter in sanitize_html
@@ -641,7 +669,6 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 				// Handle the first table row as table header.
 				// https://www.tiny.cloud/docs/plugins/table/#table_header_type
 				table_header_type: 'sectionCells',
-				table_resize_bars: false,
 				language_url: ['en_US', 'en_GB'].includes(language) ? undefined : `${bridge().vendorDir()}/lib/tinymce/langs/${language}`,
 				toolbar: toolbar.join(' '),
 				localization_function: _,
@@ -940,6 +967,13 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 				);
 				if (cancelled) return;
 
+				// Use an offset bookmark -- the default bookmark type is not preserved after unloading
+				// and reloading the editor.
+				// See https://github.com/tinymce/tinymce/issues/9736 for a brief description of the
+				// different bookmark types. An offset bookmark seems to have the smallest change
+				// when the note content is updated externally.
+				const offsetBookmarkId = 2;
+				const bookmark = editor.selection.getBookmark(offsetBookmarkId);
 				editor.setContent(awfulInitHack(result.html));
 
 				if (lastOnChangeEventInfo.current.contentKey !== props.contentKey) {
@@ -958,6 +992,9 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 					// times would result in an empty note.
 					// https://github.com/laurent22/joplin/issues/3534
 					editor.undoManager.reset();
+				} else {
+					// Restore the cursor location
+					editor.selection.bookmarkManager.moveToBookmark(bookmark);
 				}
 
 				lastOnChangeEventInfo.current = {
@@ -1048,6 +1085,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 
 		nextOnChangeEventInfo.current = null;
 
+		resetLinkTooltips();
 		const contentMd = await prop_htmlToMarkdownRef.current(info.contentMarkupLanguage, info.editor.getContent(), info.contentOriginalCss);
 
 		lastOnChangeEventInfo.current.content = contentMd;
@@ -1195,7 +1233,7 @@ const TinyMCE = (props: NoteBodyEditorProps, ref: any) => {
 					editor.insertContent(result.html);
 				}
 			} else {
-				if (BaseItem.isMarkdownTag(pastedText) || isLink(pastedText)) { // Paste a link to a note
+				if (BaseItem.isMarkdownTag(pastedText) || hasProtocol(pastedText, ['https', 'joplin', 'file'])) { // Paste a link to a note
 					logger.info('onPaste: pasting as a Markdown tag');
 					const result = await markupToHtml.current(MarkupToHtml.MARKUP_LANGUAGE_MARKDOWN, pastedText, markupRenderOptions({ bodyOnly: true }));
 					editor.insertContent(result.html);

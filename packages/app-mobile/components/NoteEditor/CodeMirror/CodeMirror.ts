@@ -14,6 +14,7 @@ import createEditor from '@joplin/editor/CodeMirror/createEditor';
 import CodeMirrorControl from '@joplin/editor/CodeMirror/CodeMirrorControl';
 import WebViewToRNMessenger from '../../../utils/ipc/WebViewToRNMessenger';
 import { WebViewToEditorApi } from '../types';
+import { focus } from '@joplin/lib/utils/focusHandler';
 
 export const initCodeMirror = (
 	parentElement: HTMLElement,
@@ -25,6 +26,21 @@ export const initCodeMirror = (
 	const control = createEditor(parentElement, {
 		initialText,
 		settings,
+
+		onPasteFile: async (data) => {
+			const reader = new FileReader();
+			return new Promise<void>((resolve, reject) => {
+				reader.onload = async () => {
+					const dataUrl = reader.result as string;
+					const base64 = dataUrl.replace(/^data:.*;base64,/, '');
+					await messenger.remoteApi.onPasteFile(data.type, base64);
+					resolve();
+				};
+				reader.onerror = () => reject(new Error('Failed to load file.'));
+
+				reader.readAsDataURL(data);
+			});
+		},
 
 		onLogMessage: message => {
 			void messenger.remoteApi.logMessage(message);
@@ -44,6 +60,15 @@ export const initCodeMirror = (
 		if (clipboardData.types.length === 1 && clipboardData.types[0] === 'text/uri-list') {
 			event.preventDefault();
 			control.insertText(clipboardData.getData('text/uri-list'));
+		}
+	});
+
+	// Note: Just adding an onclick listener seems sufficient to focus the editor when its background
+	// is tapped.
+	parentElement.addEventListener('click', (event) => {
+		const activeElement = document.querySelector(':focus');
+		if (!parentElement.contains(activeElement) && event.target === parentElement) {
+			focus('initial editor focus', control);
 		}
 	});
 

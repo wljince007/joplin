@@ -145,6 +145,14 @@ const processStartFlags = async (argv: string[], setDefaults = true) => {
 			continue;
 		}
 
+		if (arg.indexOf('--enable-wayland-ime') === 0) {
+			// Electron-specific flag - ignore it
+			// Enables input method support on Linux/Wayland
+			// See https://github.com/laurent22/joplin/issues/10345
+			argv.splice(0, 1);
+			continue;
+		}
+
 		if (arg.indexOf('--ozone-platform=') === 0) {
 			// Electron-specific flag - ignore it
 			// Allows users to run the app on native wayland
@@ -162,6 +170,13 @@ const processStartFlags = async (argv: string[], setDefaults = true) => {
 		if (arg === '--disable-gpu') {
 			// Electron-specific flag - ignore it
 			// Allows users to disable GPU acceleration
+			argv.splice(0, 1);
+			continue;
+		}
+
+		if (arg === '--updated') {
+			// Electron-specific flag - ignore it
+			// Allows to restart with the updated application after the update option is selected by the user
 			argv.splice(0, 1);
 			continue;
 		}

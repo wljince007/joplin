@@ -29,6 +29,9 @@
 	"%d notes match this pattern. Delete them?": [
 		"%d یادداشت‌هایی که مطابق این الگو هستند. آیا حذف شوند؟"
 	],
+	"%d notes will be permanently deleted. Continue?": [
+		"%d یادداشت برای همیشه حذف خواهد شد. ادامه هید؟"
+	],
 	"%s": [
 		"%s"
 	],
@@ -63,7 +66,10 @@
 		"%s = %s (%s)"
 	],
 	"%s is not optimised for synchronising many small files so your initial synchronisation will be slow.": [
-		""
+		"%s برای همگام سازی بسیاری از فایل های کوچک بهینه نشده است، بنابراین همگام سازی اولیه شما کند خواهد بود."
+	],
+	"%s tab opened": [
+		"برگه %s باز شد"
 	],
 	"%s: %d": [
 		"%s: %d"
@@ -100,6 +106,9 @@
 	],
 	"&View": [
 		"&نما"
+	],
+	"&Window": [
+		"&صفحه"
 	],
 	"(%s)": [
 		"(%s)"
@@ -141,7 +150,7 @@
 		"A5"
 	],
 	"About": [
-		""
+		"درباره"
 	],
 	"About Joplin": [
 		"درباره joplin"
@@ -158,6 +167,9 @@
 	"Accept": [
 		"قبول"
 	],
+	"Accepted invitations": [
+		"دعوت نامه های پذیرفته شده"
+	],
 	"Access denied: Please check your username and password": [
 		"دسترسی غیرمجاز: لطفاً نام کاربری و گذرواژه خود را بررسی نمایید"
 	],
@@ -166,6 +178,12 @@
 	],
 	"Account": [
 		"حساب کاربری"
+	],
+	"Account information": [
+		"اطلاعات حساب"
+	],
+	"Account type": [
+		"نوع حساب"
 	],
 	"Action": [
 		"عمل"
@@ -206,17 +224,26 @@
 	"Advanced options": [
 		"گزینه‌های پیشرفته"
 	],
+	"Advanced settings": [
+		"تنظیمات پیشرفته"
+	],
 	"Advanced tools": [
 		"ابزارهای پیشرفته"
 	],
 	"All data, including notes, notebooks and tags will be permanently deleted.": [
 		"تمام داده ها اعم از یادداشت‌ها، دفترچه‌ها و برچسب‌ها به طور دائمی حذف خواهند شد."
 	],
+	"All item sync failures have been marked as \"ignored\".": [
+		"همه خطاهای همگام سازی به عنوان \"نادیده گرفته شده\" علامت گذاری شده اند."
+	],
 	"All notes": [
 		"همه یادداشت‌ها"
 	],
 	"All potential ports are in use - please report the issue at %s": [
 		"تمام پورت‌های بالقوه در حال استفاده هستند- لطفا این مشکل را در %s گزارش نمایید"
+	],
+	"Allows debugging mobile plugins. See %s for details.": [
+		"اجازه اشکال زدایی به افزونه های موبایل را می دهد. برای جزئیات بیشتر به %s مراجعه کنید."
 	],
 	"Also displays unset and hidden config variables.": [
 		"همچنین متغیر‌های پیکربندی تنظیم نشده و مخفی را نمایش می‌دهد."
@@ -229,6 +256,9 @@
 	],
 	"Always ask": [
 		"همیشه سوال کن"
+	],
+	"Always open %s files without asking.": [
+		"همیشه فایل %s را بدون درخواست باز کنید."
 	],
 	"Always resize": [
 		"همیشه اندازه را تغییر بده"
@@ -243,10 +273,13 @@
 		"یک طراحی ذخیره شده خودکار پیدا شد. آیا می‌خواهید یک کپی از آن را به یادداشت پیوست کنید؟"
 	],
 	"An error occurred: %s": [
-		""
+		"خطایی روی داده است: %s"
 	],
 	"An update is available, do you want to download it now?": [
 		"یک بروزرسانی موجود است، آیا میخواهید الآن دانلود‌ شود؟"
+	],
+	"Android API level: %d": [
+		"سطح api اندروید : %d"
 	],
 	"Any email sent to this address will be converted into a note and added to your collection. The note will be saved into the Inbox notebook": [
 		"هر ایمیلی که به این آدرس ارسال شود به یادداشت تبدیل شده و به مجموعه شما اضافه می شود. یادداشت در صندوق دفترچه ذخیره خواهد شد"
@@ -311,20 +344,23 @@
 	"Authorisation token:": [
 		"توکن مجوز:"
 	],
+	"Authorise": [
+		"ایجاد مجوز"
+	],
 	"Auto": [
 		"خودکار"
 	],
 	"Auto-add disabled accounts for deletion": [
 		"افزودن خودکار حساب های غیرفعال برای حذف"
 	],
-	"Auto-pair braces, parenthesis, quotations, etc.": [
+	"Auto-pair braces, parentheses, quotations, etc.": [
 		"جفت‌سازی خودکار کروشه، پرانتز، نقل قول و غیره."
 	],
 	"Automatically check for updates": [
 		"بررسی خودکار برای بروزرسانی"
 	],
 	"Automatically delete notes in the trash after a number of days": [
-		""
+		"حذف خودکار یادداشت‌ها در سطل زباله پس از چند روز"
 	],
 	"Automatically switch theme to match system theme": [
 		"پوسته برنامه خودکار با پوسته سیستم تغییر کند"
@@ -334,6 +370,9 @@
 	],
 	"Basic": [
 		"پایه"
+	],
+	"Beta": [
+		"بتا"
 	],
 	"Biometric unlock is not setup on the device. Please set it up in order to unlock Joplin. If the device is on lockout, consider switching it off and on to reset biometrics scanning.": [
 		"باز کردن قفل بیومتریک روی دستگاه تنظیم نشده است. لطفاً از آن را برای باز کردن قفل joplin تنظیم کنید. اگر دستگاه در حالت قفل است، برای بازنشانی اسکن بیومتریک، آن را خاموش و روشن کنید."
@@ -348,10 +387,13 @@
 		"مرور..."
 	],
 	"Built-in": [
-		""
+		"پیش ساخته"
 	],
 	"Bulleted List": [
 		"لیست گلوله‌ای"
+	],
+	"by %s": [
+		"توسط %s"
 	],
 	"Can Share": [
 		"می‌توانید به اشتراک بگذارید"
@@ -461,6 +503,9 @@
 	"Clear alarm": [
 		"پاکسازی هشدار"
 	],
+	"Clear search": [
+		"پاکسازی جستجو"
+	],
 	"Click \"%s\" to restore the note. It will be copied in the notebook named \"%s\". The current version of the note will not be replaced or modified.": [
 		"برای بازیابی یادداشت بر روی «%s» کلیک نمایید. یادداشت در دفترچه‌ای به نام «%s» کپی می‌شود. این نسخه از یادداشت جایگزین یا تغییر داده نمی‌شود."
 	],
@@ -477,10 +522,16 @@
 		"بستن حالت کشویی"
 	],
 	"Close the application, then delete your profile in \"%s\", and start the application again. Make sure you create a backup first by exporting all your notes as JEX.": [
-		""
+		"برنامه را ببندید، سپس نمایه خود را در \"%s\" حذف کنید و برنامه را دوباره شروع کنید. اطمینان حاصل کنید که ابتدا با صادرات تمام یادداشت های خود به عنوان JEX یک نسخه پشتیبان ایجاد کرده اید."
 	],
 	"Close Window": [
 		"بستن صفحه"
+	],
+	"Cmd-click to open": [
+		"کلیک خط فرمان برای باز کردن"
+	],
+	"Cmd-click to open: %s": [
+		"کلیک خط فرمان برای باز کردن: %s"
 	],
 	"Code": [
 		"کد"
@@ -499,6 +550,9 @@
 	],
 	"Collapse": [
 		"بستن"
+	],
+	"Collapse %s": [
+		"کوچک کردن %s"
 	],
 	"Coming alarms": [
 		"هشدار‌های آینده"
@@ -527,8 +581,14 @@
 	"Completed decryption.": [
 		"رمزگشایی کامل شد."
 	],
+	"Completed with warnings:\n%s": [
+		"تکمیل شده با هشدارها:\n%s"
+	],
 	"Completed: %s (%s)": [
 		"کامل شد: %s (%s)"
+	],
+	"completion date": [
+		"تاریخ تکمیل"
 	],
 	"Compress old changes": [
 		"فشرده سازی تغییرات قدیمی"
@@ -554,11 +614,17 @@
 	"Conflicts (attachments)": [
 		"تداخل (پیوست‌ها)"
 	],
+	"Connect to Joplin Cloud": [
+		"اتصال به سرویس ابری joplin"
+	],
 	"Consolidated billing": [
 		"صورتحساب تلفیقی"
 	],
 	"Content provided by %s": [
 		"محتوای ارائه شده توسط %s"
+	],
+	"Content provided by: %s": [
+		"محتوای ارائه شده توسط: %s"
 	],
 	"Continue": [
 		"ادامه"
@@ -587,6 +653,9 @@
 	"Copy Link Address": [
 		"کپی کردن آدرس پیوند"
 	],
+	"Copy link to website": [
+		"کپی کردن لینک برای وبسایت"
+	],
 	"Copy Markdown link": [
 		"کپی کردن پیوند نشانه‌گذاری"
 	],
@@ -602,6 +671,9 @@
 	],
 	"Copy token": [
 		"کپی کردن توکن"
+	],
+	"Copy version info": [
+		"کپی اطلاعات نسخه"
 	],
 	"Could not authorise application:\n\n%s\n\nPlease try again.": [
 		"عدم احراز هویت برنامه:\n\n %s\n\nلطفا دوباره تلاش نمایید."
@@ -693,6 +765,12 @@
 	"Creating report...": [
 		"در حال ایجاد گزارش..."
 	],
+	"Ctrl-click to open": [
+		"کلیک کنترل برای باز کردن"
+	],
+	"Ctrl-click to open: %s": [
+		"کلیک کنترل برای باز کردن: %s"
+	],
 	"Current version is up-to-date.": [
 		"ورژن فعلی به‌روز است."
 	],
@@ -722,9 +800,6 @@
 	],
 	"Dashboard": [
 		"داشبورد"
-	],
-	"Database v%s": [
-		"پایگاه داده، ورژن %s"
 	],
 	"Date": [
 		"تاریخ"
@@ -795,11 +870,17 @@
 	"Delete this profile?": [
 		"حساب‌ کاربری حذف شود؟"
 	],
+	"Deleted": [
+		"حذف شده"
+	],
 	"Deleted local items: %d.": [
 		"موارد محلی حذف شده: %d."
 	],
 	"Deleted remote items: %d.": [
 		"موارد ریموت حذف شده: %d."
+	],
+	"Deletes notes permanently, skipping the trash.": [
+		"یادداشت ها را برای همیشه حذف می کند و از نگهداری در سطل زباله صرف نظر می کند."
 	],
 	"Deletes the given notebook.": [
 		"دفترچه مشخص شده را حذف می‌کند."
@@ -888,6 +969,9 @@
 	"Do not lose the password as, for security purposes, this will be the *only* way to decrypt the data! To enable encryption, please enter your password below.": [
 		"گذرواژه را از دست ندهید زیرا، برای اهداف امنیتی، این *تنها* راه برای رمزگشایی داده ها خواهد بود! برای فعال نمودن رمزنگاری، لطفا گذرواژه خود را در زیر وارد نمایید."
 	],
+	"Donate, website": [
+		"کمک مالی، وبسایت"
+	],
 	"Done": [
 		"انجام‌شده"
 	],
@@ -934,7 +1018,10 @@
 		"ورود به Dropbox"
 	],
 	"Due": [
-		""
+		"به واسطه"
+	],
+	"due date": [
+		"سررسید"
 	],
 	"Duplicate": [
 		"تکراری"
@@ -1005,6 +1092,9 @@
 	"Email to Note": [
 		"تبدیل ایمیل به یادداشت"
 	],
+	"Email To Note, login information": [
+		"ایمیل به یادداشت، اطلاعات ورود به سیستم"
+	],
 	"Emails": [
 		"ایمیل‌ها"
 	],
@@ -1012,7 +1102,7 @@
 		"متن تأکید شده"
 	],
 	"Empty trash": [
-		""
+		"خالی کردن سطل زباله"
 	],
 	"Enable": [
 		"فعال سازی"
@@ -1066,10 +1156,16 @@
 		"فعال‌سازی تاریخچه‌ یادداشت"
 	],
 	"Enable optical character recognition (OCR)": [
-		""
+		"فعال سازی تشخیص نوری کاراکتر (OCR)"
+	],
+	"Enable or disable plugins": [
+		"فعال یا غیر فعال سازی افزونه ها"
 	],
 	"Enable PDF viewer": [
 		"فعال‌سازی نمایشگر PDF"
+	],
+	"Enable plugin support": [
+		"پشتیبانی از افزونه را فعال کنید"
 	],
 	"Enable soft breaks": [
 		"فعال‌سازی شکستن نرم خطوط"
@@ -1161,11 +1257,20 @@
 	"Evernote Export File (as Markdown)": [
 		"فایل صادر شده Evernote (به صورت نشانه‌گذاری)"
 	],
+	"Evernote Export Files (Directory, as HTML)": [
+		"فایلهای صادر شده Evernote (به صورت HTML)"
+	],
+	"Evernote Export Files (Directory, as Markdown)": [
+		"فایلهای صادر شده Evernote (به صورت نشانه‌گذاری)"
+	],
 	"Exits the application.": [
 		"خروح از نرم‌افزار."
 	],
 	"Expand": [
 		"منبسط"
+	],
+	"Expand %s": [
+		"گسترش %s"
 	],
 	"Export": [
 		"صدور"
@@ -1230,6 +1335,9 @@
 	"File system": [
 		"فایل سیستم"
 	],
+	"Filter": [
+		"فیلتر"
+	],
 	"Filter tags": [
 		"فیلتر برچسب‌ها"
 	],
@@ -1256,9 +1364,6 @@
 	],
 	"Focus title": [
 		"عنوان تمرکز"
-	],
-	"Folders": [
-		"پوشه‌ها"
 	],
 	"For debugging purpose only: export your profile to an external SD card.": [
 		"تنها به منظور اشکال‌زدایی: صدور حساب‌کاربری شما به یک حافظه خارجی SD."
@@ -1307,7 +1412,7 @@
 		"در حال بوجود آوردن پیوند..."
 	],
 	"Geolocation, spellcheck, editor toolbar, image resize": [
-		""
+		"موقعیت جغرافیایی، بررسی املایی، نوار ابزار ویرایشگر، تغییر اندازه تصویر"
 	],
 	"Get it now:": [
 		"هم‌اکنون دریافت نمایید:"
@@ -1317,6 +1422,9 @@
 	],
 	"Gets or sets a config value. If [value] is not provided, it will show the value of [name]. If neither [name] nor [value] is provided, it will list the current configuration.": [
 		"یک مقدار تنظیمات را دریافت یا قرار می‌دهد. اگر [value] (مقدار) داده نشود، مقدار [name] (اسم) نمایش داده خواهد شد. اگر نه [name] (اسم) و نه [value] (مقدار) داده نشده باشند، تنظیمات فعلی لیست می‌شود."
+	],
+	"Go to Joplin Cloud profile": [
+		"ورود به حساب سرویس ابری joplin"
 	],
 	"Go to source URL": [
 		"رفتن به آدرس منبع"
@@ -1328,7 +1436,7 @@
 		"اعطای مجوز"
 	],
 	"Have you authorised the application login in the above URL?": [
-		""
+		"آیا ورود برنامه را در URL بالا مجاز کرده اید؟"
 	],
 	"Header %d": [
 		"سرصفحه %d"
@@ -1341,6 +1449,9 @@
 	],
 	"Help": [
 		"کمک"
+	],
+	"Here's what we do to make plugins safer:": [
+		"کاری که ما برای ایمن‌تر کردن افزونه‌ها انجام می‌دهیم در اینجا آمده است:"
 	],
 	"Hermes enabled: %d": [
 		"Hermes فعال شده: %d"
@@ -1397,7 +1508,7 @@
 		"بیکار"
 	],
 	"If you have already authorised, please wait for the application to sync to Joplin Cloud.": [
-		""
+		"اگر قبلاً احراز هویت شده‌اید، لطفاً منتظر بمانید تا برنامه با سرویس ابری Joplin همگام شود."
 	],
 	"Ignore": [
 		"نادیده‌گرفتن"
@@ -1405,17 +1516,41 @@
 	"Ignore TLS certificate errors": [
 		"نادیده‌گرفتن خطاهای گواهی‌نامه TLS"
 	],
+	"Ignored items that cannot be synchronised": [
+		"موارد نادیده گرفته شده که نمی توانند همگام شوند"
+	],
 	"Images": [
 		"تصاویر"
 	],
 	"Import": [
 		"وارد کردن"
 	],
+	"Import and Export": [
+		"واردات و صادرات"
+	],
+	"Import failed. Make sure a JEX file was selected.\nDetails: %s": [
+		"واردات انجام نشد. مطمئن شوید که یک فایل JEX انتخاب شده است.\nجزئیات: %s"
+	],
+	"Import from JEX": [
+		"واردات از JEX"
+	],
+	"Import notes from a JEX (Joplin Export) file.": [
+		"یادداشت ها را از یک فایل JEX (صادرات Joplin) وارد کنید."
+	],
+	"Import or export your data": [
+		"داده های خود را وارد یا صادر کنید"
+	],
+	"Imported successfully!": [
+		"با موفقیت وارد شد!"
+	],
 	"Importing from \"%s\" as \"%s\" format. Please wait...": [
 		"در حال وارد کردن از «%s» با فرمت «%s». لطفا صبور باشید..."
 	],
 	"Importing notes...": [
 		"در حال وارد کردن یادداشت‌ها..."
+	],
+	"Importing...": [
+		"در حال صدور..."
 	],
 	"Imports data into Joplin.": [
 		"داده را در joplin وارد می‌کند."
@@ -1433,7 +1568,7 @@
 		"برای انجام این کار، کل مجموعه داده شما باید رمزنگاری و همگام شود، بنابراین بهتر است آن را به یکباره اجرا نماید.\n\nبرای شروع، لطفا این دستورالعمل‌ها را دنبال کنید:\n1. همه دستگاه های خود را همگام سازی کنید.\n2. بر روی «%s» کلیک نمایید.\n3. اجازه دهید تا کامل شود. در حین اجرا، از تغییر هر یادداشتی در دستگاه‌های دیگر خود اجتناب نمایید  تا از بروز تداخل جلوگیری شود.\n4.پس از انجام همگام‌سازی در این دستگاه، همه دستگاه‌های دیگر خود را همگام‌سازی کنید و اجازه دهید تا کامل شود.\n\nنکته‌ی مهم: شما فقط باید این عملیات را یک مرتبه و تنها روی یک دستگاه اجرا کنید."
 	],
 	"In order to synchronise, please upgrade your application to version %s+": [
-		""
+		"برای همگام سازی، لطفاً برنامه خود را به نسخه %s+ ارتقا دهید"
 	],
 	"In order to use file system synchronisation your permission to write to external storage is required.": [
 		"برای استفاده از همگام‌سازی سیستم فایل، اجازه نوشتن روی حافظه خارجی مورد نیاز است."
@@ -1446,6 +1581,9 @@
 	],
 	"In: %s": [
 		"در: %s"
+	],
+	"Incompatible": [
+		"ناسازگار"
 	],
 	"Increase indent level": [
 		"افزایش سطح تورفتگی"
@@ -1480,6 +1618,9 @@
 	"Installed": [
 		"نصب‌شده"
 	],
+	"Installed (%d):": [
+		"نصب شده (%d):"
+	],
 	"Installing...": [
 		"در حال نصب..."
 	],
@@ -1500,6 +1641,9 @@
 	],
 	"Invalid password": [
 		"گذرواژه نامعتبر"
+	],
+	"iOS version: %s": [
+		"نسخه iOS: %s"
 	],
 	"Italic": [
 		"مورب"
@@ -1525,6 +1669,15 @@
 	"Joplin Cloud": [
 		"سرویس ابری joplin"
 	],
+	"Joplin Cloud Login": [
+		"ورود سرویس ابری joplin"
+	],
+	"Joplin Desktop": [
+		"joplin نسخه دسکتاپ"
+	],
+	"Joplin doesn't recognise the %s extension. Opening this file could be dangerous. What would you like to do?": [
+		"joplin پسوند %s را نمی شناسد. باز کردن این فایل ممکن است خطرناک باشد. دوست دارید چه کار کنید؟"
+	],
 	"Joplin Export Directory": [
 		"پوشه صادرات joplin"
 	],
@@ -1536,6 +1689,9 @@
 	],
 	"Joplin Forum": [
 		"انجمن joplin"
+	],
+	"Joplin Mobile": [
+		"joplin نسخه موبایل"
 	],
 	"Joplin Server": [
 		"سرور joplin"
@@ -1564,6 +1720,9 @@
 	"Keep note history for": [
 		"تاریخچه ی یادداشت را نگه دار به مدت"
 	],
+	"Keep notes in the trash for": [
+		"یادداشت ها را در سطل زباله نگه دار برای"
+	],
 	"Keyboard Mode": [
 		"حالت صفحه‌کلید"
 	],
@@ -1585,6 +1744,9 @@
 	"Language": [
 		"زبان"
 	],
+	"Language, date format": [
+		"زبان، فرمت تاریخ"
+	],
 	"Last error: %s": [
 		"آخرین خطا: %s"
 	],
@@ -1592,7 +1754,7 @@
 		"بعداً"
 	],
 	"Latitude": [
-		""
+		"عرض جغرافیایی"
 	],
 	"Layout": [
 		"چیدمان"
@@ -1600,8 +1762,14 @@
 	"Layout button sequence": [
 		"دنباله دکمه چیدمان"
 	],
+	"Learn more": [
+		"بیشتر بدانید"
+	],
 	"Leave it blank to download the language files from the default website": [
 		"برای دانلود فایل‌های زبان از سایت پیشفرض، آن را خالی بگذارید"
+	],
+	"Leave notebook": [
+		"ترک دفترچه"
 	],
 	"Leave notebook...": [
 		"ترک دفترچه..."
@@ -1614,6 +1782,9 @@
 	],
 	"Light": [
 		"روشن"
+	],
+	"Like any software you install, plugins can potentially cause security issues or data loss.": [
+		"مانند هر نرم افزاری که نصب می کنید، افزونه ها به طور بالقوه می توانند باعث مشکلات امنیتی یا از دست دادن داده ها شوند."
 	],
 	"Lines": [
 		"خطوط"
@@ -1665,10 +1836,10 @@
 		"خروج"
 	],
 	"Logs, profiles, sync status": [
-		""
+		"لاگ‌ها، نمایه‌ها، وضعیت همسان سازی"
 	],
 	"Longitude": [
-		""
+		"طول جغرافیایی"
 	],
 	"Make a donation": [
 		"کمک مالی"
@@ -1684,6 +1855,9 @@
 	],
 	"Manage profiles": [
 		"مدیریت حساب‌کاربری"
+	],
+	"Manage shared notebooks": [
+		"مدیریت دفترچه‌های مشترک"
 	],
 	"Manage your plugins": [
 		"مدیریت افزونه‌های شما"
@@ -1731,10 +1905,10 @@
 		"حداکثر اندازه مجموع"
 	],
 	"Media player, math, diagrams, table of contents": [
-		""
+		"پخش کننده رسانه، ریاضی، نمودارها، فهرست مطالب"
 	],
 	"Minimise": [
-		""
+		"کوچک کردن"
 	],
 	"Missing keys": [
 		"کلیدها‌ یافت نشدند"
@@ -1760,8 +1934,14 @@
 	"More than one item match \"%s\". Please narrow down your query.": [
 		"بیش از یک مورد مطابق «%s» وجود دارد. لطفاً عبارت جستجو را محدودتر کنید."
 	],
+	"Most plugins have source code available for review on the plugin website.": [
+		"اکثر افزونه ها دارای کد منبع برای بررسی در وب سایت افزونه هستند."
+	],
 	"Move %d notes to notebook \"%s\"?": [
 		"انتقال یادداشت‌های  %d به دفترچه «%s»؟"
+	],
+	"Move notebook \"%s\" to the trash?\n\nAll notes and sub-notebooks within this notebook will also be moved to the trash.": [
+		"دفترچه «%s» حذف شود؟\n\nتمامی یادداشت‌ها و دفترچه‌های فرزند این دفترچه نیز حذف خواهند شد."
 	],
 	"Move to notebook": [
 		"انتقال به دفترچه"
@@ -1783,6 +1963,12 @@
 	],
 	"Never resize": [
 		"هرگز بدون تغییر اندازه"
+	],
+	"New": [
+		"جدید"
+	],
+	"New invitations": [
+		"دعوت نامه های جدید"
 	],
 	"New note": [
 		"یادداشت جدید"
@@ -1835,6 +2021,9 @@
 	"No item with ID %s": [
 		"هیچ موردی با شناسه %s وجود ندارد"
 	],
+	"No new invitations": [
+		"دعوتنامه جدیدی وجود ندارد"
+	],
 	"No notebook has been specified.": [
 		"هیچ دفترچه‌ای مشخص نشده است."
 	],
@@ -1843,6 +2032,9 @@
 	],
 	"No notes in here. Create one by clicking on \"New note\".": [
 		"یادداشتی وجود ندارد. با کلیک بر روی «یادداشت جدید» یکی ایجاد نمایید."
+	],
+	"No plugins are installed.": [
+		"هیچ افزونه‌ای نصب نشده است."
 	],
 	"No resources!": [
 		"بدون منابع!"
@@ -1855,6 +2047,9 @@
 	],
 	"No suggestions": [
 		"هیچ پیشنهادی وجود ندارد"
+	],
+	"No tab selected": [
+		"هیچ برگه ای انتخاب نشده است"
 	],
 	"No text editor is defined. Please set it using `config editor <editor-path>`": [
 		"هیچ ویرایشگر متنی مشخص نشده است. لطفا با استفاده از `<editor-path> تنظیمات ویرایشگر` آن را مشخص کنید"
@@ -1940,6 +2135,9 @@
 	"Notebook: %s": [
 		"دفترچه: %s"
 	],
+	"Notebook: %s (%s)": [
+		"دفترچه: %s (%s)"
+	],
 	"Notebooks": [
 		"دفترچه‌ها"
 	],
@@ -1991,11 +2189,17 @@
 	"Open %s": [
 		"بازکردن %s"
 	],
+	"Open it": [
+		"باز کن"
+	],
 	"Open PDF viewer": [
 		"بازکردن مشاهده‌کننده PDF"
 	],
 	"Open profile directory": [
 		"بازکردن مسیر حساب کاربری"
+	],
+	"Open Source": [
+		"متن باز"
 	],
 	"Open Sync Wizard...": [
 		"بازکردن راهنمای همگام‌سازی..."
@@ -2004,7 +2208,7 @@
 		"باز کردن..."
 	],
 	"Opening section %s": [
-		""
+		"بازکردن بخش در %s"
 	],
 	"Operation cancelled": [
 		"عملیات لغو شد"
@@ -2054,6 +2258,21 @@
 	"Per user. Minimum of %d users.": [
 		"به ازای هر کاربر. حداقل %d کاربر."
 	],
+	"Permanently delete note": [
+		"حذف دائمی یادداشت‌"
+	],
+	"Permanently delete note \"%s\"?": [
+		"آیا یادداشت «%s» به طور دائم حذف شود؟"
+	],
+	"Permanently delete notebook \"%s\"?\n\nAll notes and sub-notebooks within this notebook will be permanently deleted.": [
+		"دفترچه \"%s\" برای همیشه حذف شود؟\n\nهمه یادداشت‌ها و زیر دفترچه‌های این دفترچه برای همیشه حذف خواهند شد."
+	],
+	"Permanently delete these %d notes?": [
+		"آیا یادداشت‌های پوشه %d به طور دائم حذف شود؟"
+	],
+	"Permanently deletes the notebook, skipping the trash.": [
+		"دفترچه را برای همیشه حذف می کند و از نگهداری در سطل زباله صرف نظر می کند."
+	],
 	"Permission needed": [
 		"مجوز استفاده مورد نیاز است"
 	],
@@ -2093,8 +2312,8 @@
 	"Please specify the notebook where the notes should be imported to.": [
 		"لطفا دفترچه‌ای که یادداشت‌ها باید به آن وارد شوند را مشخص کنید."
 	],
-	"Please upgrade Joplin to use this plugin": [
-		"لطفاً برای استفاده از این افزونه، joplin را ارتقا دهید"
+	"Please upgrade Joplin to version %s or later to use this plugin.": [
+		"لطفاً برای استفاده از این افزونه، Joplin را به نسخه %s یا جدیدتر ارتقا دهید."
 	],
 	"Please wait for all attachments to be downloaded and decrypted. You may also switch to %s to edit the note.": [
 		"لطفا صبر کنید تا همه پیوست‌ها دانلود و رمزگشایی شوند. شما همچنین می‌توانید به %s برای ویرایش یادداشت بروید."
@@ -2102,14 +2321,32 @@
 	"Please wait...": [
 		"لطفاً صبور باشید..."
 	],
+	"Plugin message": [
+		"پیغام افزونه"
+	],
+	"Plugin panels": [
+		"پنل افزونه"
+	],
 	"Plugin repository failed to load": [
-		""
+		"خطا در بارگذاری مخزن افزونه"
+	],
+	"Plugin search": [
+		"جستجوی پلاگین"
+	],
+	"Plugin security": [
+		"امنیت افزونه"
 	],
 	"Plugin tools": [
 		"ابزارهای افزونه"
 	],
+	"Plugin WebView debugging": [
+		"افزونه اشکال زدایی WebView"
+	],
 	"Plugins": [
 		"پلاگین‌ها"
+	],
+	"Plugins extend Joplin with features that are not present by default. Plugins can extend Joplin's editor, viewer, and more.": [
+		"افزونه ها Joplin را با ویژگی هایی گسترش می دهند که به طور پیش فرض وجود ندارند. پلاگین ها می توانند ویرایشگر، بیننده و موارد دیگر Joplin را گسترش دهند."
 	],
 	"Portrait": [
 		"عمودی"
@@ -2170,6 +2407,9 @@
 	],
 	"Process user deletions": [
 		"پردازش حذف کاربران"
+	],
+	"Processing": [
+		"در حال پردازش"
 	],
 	"Profile": [
 		"حساب کاربری"
@@ -2240,6 +2480,12 @@
 	"Recipients:": [
 		"گیرندگان:"
 	],
+	"Recommended": [
+		"پیشنهاد شده"
+	],
+	"Recommended plugins": [
+		"افزونه های پیشنهادی"
+	],
 	"Redo": [
 		"باز انجام"
 	],
@@ -2288,6 +2534,21 @@
 	"Replace: ": [
 		"جایگزین کردن: "
 	],
+	"Report an issue": [
+		"گزارش مشکل"
+	],
+	"Report any issues concerning the plugin.": [
+		"هر گونه مشکل در مورد افزونه را گزارش دهید."
+	],
+	"Report fraudulent plugin": [
+		"گزارش افزونه تقلبی"
+	],
+	"Report system": [
+		"سیستم گزارش"
+	],
+	"Reports": [
+		"گزارش ها"
+	],
 	"Reset application layout": [
 		"بازیابی چیدمان برنامه"
 	],
@@ -2303,14 +2564,32 @@
 	"Restart and upgrade": [
 		"راه اندازی مجدد و ارتقا"
 	],
+	"Restart in safe mode": [
+		"راه اندازی مجدد در حالت امن"
+	],
 	"Restart now": [
 		"راه اندازی مجدد هم‌اکنون"
 	],
 	"Restore": [
 		"بازگرداندن"
 	],
+	"Restore note": [
+		"بازیابی یادداشت"
+	],
+	"Restore notebook": [
+		"بازیابی دفترچه دفترچه"
+	],
+	"Restore the items matching <pattern> from the trash.": [
+		"مواردی که مطابق با <pattern> باشند را از سطل زباله بازیابی کن."
+	],
+	"Restored items": [
+		"موارد بازیابی شده"
+	],
 	"Restored Notes": [
 		"یادداشت های بازیابی شده"
+	],
+	"Results (%d):": [
+		"نتایج (%d):"
 	],
 	"Retry": [
 		"تلاش مجدد"
@@ -2384,11 +2663,17 @@
 	"Search for...": [
 		"جستجو در..."
 	],
+	"Search hidden": [
+		"جستجوی مخفی"
+	],
 	"Search in all the notes": [
 		"جستجو در تمام یادداشت‌ها"
 	],
 	"Search in current note": [
 		"جستجو در یادداشت جاری"
+	],
+	"Search shown": [
+		"جستجوی نمایش داده شده"
 	],
 	"Search...": [
 		"جستجو..."
@@ -2416,6 +2701,9 @@
 	],
 	"Select parent notebook": [
 		"انتخاب دفترچه والد"
+	],
+	"Send bug report": [
+		"ارسال گزارش خطا"
 	],
 	"Server is already running on port %d": [
 		"سرور در حال حاضر بر روی پورت %d در حال اجراست"
@@ -2450,6 +2738,9 @@
 	"Share a notebook with others": [
 		"یک دفترچه را با دیگران به اشتراک بگذارید"
 	],
+	"Share from %s (%s)": [
+		"اشتراک‌گذاری از %s (%s)"
+	],
 	"Share Notebook": [
 		"به اشتراک گذاری دفترچه"
 	],
@@ -2458,6 +2749,9 @@
 	],
 	"Share permissions": [
 		"مجوزهای اشتراک‌گذاری"
+	],
+	"Shares": [
+		"اشتراک‌ها"
 	],
 	"Sharing notebook...": [
 		"در حال اشتراک‌گذاری دفترچه..."
@@ -2482,6 +2776,9 @@
 	],
 	"Show disabled keys": [
 		"نمایش کلیدهای غیرفعال"
+	],
+	"Show monospace fonts only.": [
+		"فقط فونت های monospace نمایش داده شود."
 	],
 	"Show more actions": [
 		"نمایش اقدامات بیشتر"
@@ -2529,10 +2826,10 @@
 		"Solarised Light"
 	],
 	"Some attachments could not be downloaded. Please try to download them again.": [
-		""
+		"برخی از پیوست ها دانلود نشدند. لطفا سعی کنید دوباره آنها را دانلود کنید."
 	],
 	"Some attachments need to be downloaded. Set the attachment download mode to \"always\" and try again.": [
-		""
+		"برخی از پیوست ها باید دانلود شوند. حالت دانلود پیوست را روی «همیشه» تنظیم کنید و دوباره امتحان کنید."
 	],
 	"Some items cannot be decrypted.": [
 		"بعضی از موارد نمی‌توانند رمزگشایی شوند."
@@ -2542,6 +2839,9 @@
 	],
 	"Some items cannot be synchronised. Press for more info.": [
 		"بعضی از موارد نمی‌توانند همگام‌سازی شوند. برای اطلاعات بیشتر بفشارید."
+	],
+	"Some items could not be synchronised. Please try to synchronise them first.": [
+		"برخی از موارد را نمی توان همگام سازی کرد. لطفا ابتدا سعی کنید آنها را همگام سازی کنید."
 	],
 	"Sort notebooks by": [
 		"مرتب‌سازی دفترچه‌ها بر اساس"
@@ -2563,6 +2863,9 @@
 	],
 	"Source: ": [
 		"منبع "
+	],
+	"Spacer": [
+		"فاصله‌ساز"
 	],
 	"Specify the port that should be used by the API server. If not set, a default will be used.": [
 		"پورتی که باید توسط سرور API استفاده شود را مشخص نمایید. در غیر اینصورت، یک پورت پیشفرض استفاده خواهد شد."
@@ -2690,6 +2993,9 @@
 	"Sync your notes": [
 		"یادداشت‌های خود را همگام‌سازی کنید"
 	],
+	"Sync, encryption, proxy": [
+		"همگام سازی، رمزگذاری، پروکسی"
+	],
 	"Synchronisation": [
 		"همگام‌سازی"
 	],
@@ -2738,6 +3044,9 @@
 	"Take photo": [
 		"عکس گرفتن"
 	],
+	"Task \"%s\" failed with error: %s": [
+		"کار \"%s\" با خطا: %s ناموفق بود"
+	],
 	"Task list": [
 		"فهرست کار"
 	],
@@ -2752,6 +3061,9 @@
 	],
 	"Text editor command": [
 		"دستور ویرایشگر متن"
+	],
+	"The [Web Clipper](%s) is a browser extension that allows you to save web pages and screenshots from your browser.": [
+		"[Web Clipper](%s) یک افزونه مرورگر است که به شما امکان می دهد صفحات وب و اسکرین شات ها را از مرورگر خود ذخیره کنید."
 	],
 	"The active profile cannot be deleted. Switch to a different profile and try again.": [
 		"حساب‌کاربری فعال را نمی توان حذف کرد. به حساب‌کاربری دیگری بروید و دوباره امتحان کنید."
@@ -2798,6 +3110,10 @@
 	"The factor property sets how the item will grow or shrink to fit the available space in its container with respect to the other items. Thus an item with a factor of 2 will take twice as much space as an item with a factor of 1.Restart app to see changes.": [
 		"ویژگی فاکتور نحوه رشد یا کوچک شدن آیتم را تعیین می‌کند تا فضای موجود در ظرف خود را با توجه به سایر موارد متناسب کند. بنابراین یک مورد با ضریب 2، دو برابر فضای بیشتری نسبت به یک مورد با ضریب 1 اشغال می‌کند. برای مشاهده تغییرات، برنامه را مجدد راه‌اندازی کنید."
 	],
+	"The following attachment matches your search query:": [
+		"پیوست زیر با عبارت جستجوی شما مطابقت دارد:",
+		"پیوست های زیر برای تغییرات در حال مشاهده هستند:"
+	],
 	"The following attachments are being watched for changes:": [
 		"پیوست های زیر برای تغییرات در حال مشاهده هستند:"
 	],
@@ -2822,6 +3138,13 @@
 	"The note \"%s\" has been successfully restored to the notebook \"%s\".": [
 		"یادداشت «%s» با موفقیت به دفترچه «%s» بازگردانده شد."
 	],
+	"The note was successfully moved to the trash.": [
+		"یادداشت با موفقیت به سطل زباله منتقل شد.",
+		"یادداشت «%s» با موفقیت به دفترچه «%s» بازگردانده شد."
+	],
+	"The notebook and its content was successfully moved to the trash.": [
+		"پوشه یادداشتها و محتوای آن با موفقیت به سطل زباله منتقل شد."
+	],
 	"The notebook could not be saved: %s": [
 		"دفترچه نتوانست ذخیره شود: %s"
 	],
@@ -2835,7 +3158,7 @@
 		"گیرنده را نمی توان از لیست حذف کرد. لطفا دوباره تلاش کنید.\n\nجزئیات خطا: «%s»"
 	],
 	"The sync target cannot be changed for the following reason: %s\n\nIf the issue cannot be resolved, you may need to clear your data first by following these instructions:\n\n%s": [
-		""
+		"هدف همگام سازی به دلایل زیر قابل تغییر نیست:%s\n\nاگر مشکل حل نشد، ممکن است لازم باشد ابتدا اطلاعات خود را با دنبال کردن این دستورالعمل ها پاک کنید:\n\n%s"
 	],
 	"The sync target needs to be upgraded before Joplin can sync. The operation may take a few minutes to complete and the app needs to be restarted. To proceed please click on the link.": [
 		"قبل از اینکه joplin بتواند همگام‌سازی کند، هدف همگام‌سازی باید ارتقا یابد. ممکن است عملیات چند دقیقه طول بکشد و برنامه باید دوباره راه‌اندازی شود. برای ادامه لطفا روی لینک کلیک کنید."
@@ -2867,14 +3190,17 @@
 	"Theme": [
 		"پوسته"
 	],
+	"Themes, editor font": [
+		"پوسته، فونت ویرایشگر"
+	],
 	"There are currently no notes. Create one by clicking on the (+) button.": [
 		"در حال حاضر یادداشتی وجود ندارد. با کلیک بر روی دکمه (+) یکی بسازید."
 	],
+	"There are no notes in the trash folder.": [
+		"هیچ یادداشتی در پوشه سطل زباله وجود ندارد."
+	],
 	"There are unsaved changes.": [
 		"تغییرات ذخیره نشده‌ای وجود دارد."
-	],
-	"There is currently no notebook. Create one by clicking on \"New notebook\".": [
-		"در حال حاظر هیچ یادداشتی وجود ندارد. با کلیک بر روی «یادداشت جدید» یک یادداشت جدید ایجاد کنید."
 	],
 	"There is no data to export.": [
 		"داده‌ای برای صدور وجود ندارد."
@@ -2885,6 +3211,9 @@
 	"There was an error downloading this attachment:": [
 		"یک خطا در دانلود این پیوست بود:"
 	],
+	"These items failed to sync, but have been marked as \"ignored\". They won't cause the sync warning to appear, but still aren't synced. To unignore, click \"retry\".": [
+		"این موارد همگام‌سازی نشدند، اما به‌عنوان «نادیده‌گرفته» علامت‌گذاری شدند. آنها باعث نمی شوند که هشدار همگام سازی ظاهر شود، اما همچنان همگام سازی نمی شوند. برای لغو نادیده گرفتن، روی «تلاش مجدد» کلیک کنید."
+	],
 	"These items will remain on the device but will not be uploaded to the sync target. In order to find these items, either search for the title or the ID (which is displayed in brackets above).": [
 		"این موارد در دستگاه باقی می‌مانند اما در هدف همگام‌سازی آپلود نمی‌شوند. برای یافتن این موارد، عنوان یا شناسه (که در پرانتز بالا نمایش داده شده است) را جستجو نمایید."
 	],
@@ -2893,6 +3222,9 @@
 	],
 	"This allows another user to share a notebook with you, and you can then both collaborate on it. It does not however allow you to share a notebook with someone else, unless you have the feature \"%s\".": [
 		"این به کاربر دیگری اجازه می دهد تا یک دفترچه‌ را با شما به اشتراک بگذارد و سپس می توانید هر دو در آن همکاری کنید. با این حال به شما اجازه نمی‌دهد یک دفترچه را با شخص دیگری به اشتراک بگذارید، مگر اینکه ویژگی «%s» را داشته باشید."
+	],
+	"This attachment does not have OCR data (Status: %s)": [
+		"این پیوست داده OCR ندارد (وضعیت: %s)"
 	],
 	"This attachment is not downloaded or not decrypted yet": [
 		"این پیوست هنوز دانلود یا رمزگشایی نشده"
@@ -2933,11 +3265,17 @@
 	"This note has no history": [
 		"این یادداشت هیچ تاریخچه ای ندارد"
 	],
+	"This plugin doesn't support %s.": [
+		"این افزونه %s را پشتیبانی نمی کند."
+	],
 	"This Rich Text editor has a number of limitations and it is recommended to be aware of them before using it.": [
 		"ویرایشگر Rich Text دارای تعدادی محدودیت است و توصیه می شود قبل از استفاده از آن ها آگاه باشید."
 	],
 	"This service allows the browser extension to communicate with Joplin. When enabling it your firewall may ask you to give permission to Joplin to listen to a particular port.": [
 		"این سرویس به افزونه مرورگر اجازه می دهد تا با joplin  ارتباط برقرار کند. هنگام فعال کردن آن، فایروال شما ممکن است از شما بخواهد که به joplin  اجازه دهید تا به یک پورت خاص در ارتباط باشد."
+	],
+	"This subfolder of the trash has no notes.": [
+		"این زیرپوشه سطل زباله هیچ یادداشتی ندارد."
 	],
 	"This will allow Joplin to run in the background. It is recommended to enable this setting so that your notes are constantly being synchronised, thus reducing the number of conflicts.": [
 		"این به joplin اجازه می‌دهد تا در پس زمینه اجرا شود. توصیه می‌شود این تنظیم را فعال کنید تا یادداشت های شما دائماً همگام شوند و در نتیجه تعداد تداخل‌ها کاهش یابند."
@@ -2946,7 +3284,10 @@
 		"این یک صفحه جدید باز می‌کند. تغییرات فعلی ذخیره شوند؟"
 	],
 	"This will permanently delete all items in the trash. Continue?": [
-		""
+		"با این کار همه موارد موجود در سطل زباله برای همیشه حذف می شوند. آیا ادامه هید؟"
+	],
+	"This will permanently delete the note \"%s\". Continue?": [
+		"با این کار یادداشت \"%s\" برای همیشه حذف می شود. ادامه می‌دهید؟"
 	],
 	"This will remove the notebook from your collection and you will no longer have access to its content. Do you wish to continue?": [
 		"با این کار، دفترچه از مجموعه شما حذف می شود و دیگر به محتوای آن دسترسی نخواهید داشت. آیا مایل هستید ادامه دهید؟"
@@ -2962,6 +3303,9 @@
 	],
 	"To allow Joplin to synchronise with Dropbox, please follow the steps below:": [
 		"برای اینکه به joplin اجازه همگام‌سازی با Dropbox را بدهید، مراحل زیر را دنبال نمایید:"
+	],
+	"To allow Joplin to synchronise with Joplin Cloud, please login using this URL:": [
+		"برای اینکه به Joplin اجازه دهید با سرویس ابری Joplin همگام شود، لطفاً با استفاده از این URL وارد شوید:"
 	],
 	"To continue, please enter your master password below.": [
 		"برای ادامه، لطفاً گذرواژه اصلی خود را در زیر وارد نمایید."
@@ -2999,6 +3343,9 @@
 	"to-do": [
 		"فهرست کار"
 	],
+	"To-do": [
+		"فهرست کار"
+	],
 	"to-do: %s": [
 		"فهرست کار: %s"
 	],
@@ -3016,6 +3363,12 @@
 	],
 	"Toggle external editing": [
 		"تغییر وضعیت ویرایش خارجی"
+	],
+	"Toggle menu bar": [
+		"تغییر وضعیت نوار منو"
+	],
+	"Toggle note history, keep notes for": [
+		"تغییر تاریخچه‌ی یادداشت، یادداشت را نگه دار به مدت"
 	],
 	"Toggle note list": [
 		"تغییر وضعیت فهرست یادداشت"
@@ -3045,7 +3398,7 @@
 		"مجموع: %d از %d"
 	],
 	"Trash": [
-		""
+		"سطل زباله"
 	],
 	"Try again": [
 		"تلاش دوباره"
@@ -3071,9 +3424,6 @@
 	"Unable to edit resource of type %s": [
 		"امکان ویرایش منبع از نوع %s وجود ندارد"
 	],
-	"Unable to export or share data. Reason: %s": [
-		"امکان صدور یا اشتراک‌گذاری داده وجود ندارد. دلیل: %s"
-	],
 	"Unable to share log data. Reason: %s": [
 		"امکان اشتراک‌گذاری داده های لاگ وجود ندارد. دلیل: %s"
 	],
@@ -3084,7 +3434,10 @@
 		"بازگرد"
 	],
 	"Uninstall and reinstall the application. Make sure you create a backup first by exporting all your notes as JEX from the desktop application.": [
-		""
+		"برنامه را حذف و دوباره نصب کنید. اطمینان حاصل کنید که ابتدا با صادر کردن تمام یادداشت های خود به عنوان JEX از برنامه دسکتاپ، یک نسخه پشتیبان ایجاد کرده اید."
+	],
+	"Unknown file type": [
+		"نوع فایل نامشخص"
 	],
 	"Unknown flag: %s": [
 		"پرچم ناشناخته: %s"
@@ -3115,6 +3468,9 @@
 	],
 	"Update": [
 		"بروزرسانی"
+	],
+	"Update available": [
+		"به روز رسانی موجود است"
 	],
 	"Update profile": [
 		"بروز رسانی حساب‌ کاربری"
@@ -3200,6 +3556,9 @@
 	"View": [
 		"نما"
 	],
+	"View OCR text": [
+		"مشاهده متن OCR"
+	],
 	"View on map": [
 		"نمایش بر روی نقشه"
 	],
@@ -3218,14 +3577,20 @@
 	"Voice typing...": [
 		"تایپ صوتی..."
 	],
+	"Waiting for authorisation...": [
+		"در انتظار احراز هویت..."
+	],
 	"Warning": [
 		"هشدار"
 	],
 	"Warning: not all resources shown for performance reasons (limit: %s).": [
 		"هشدار: همه منابع به دلایل عملکرد نشان داده نمی شوند (محدود: %s)."
 	],
-	"Warnings:\n%s": [
-		"هشدارها: %s"
+	"We have a system for reporting and removing problematic plugins.": [
+		"ما سیستمی برای گزارش دهی و حذف افزونه های مشکل دار داریم."
+	],
+	"We mark plugins developed by trusted Joplin community members as \"recommended\".": [
+		"ما افزونه‌های توسعه‌یافته توسط اعضای مورد اعتماد جامعه Joplin را به‌عنوان «توصیه‌شده» علامت‌گذاری می‌کنیم."
 	],
 	"Web Clipper": [
 		"Web Clipper"
@@ -3245,11 +3610,20 @@
 	"Website and documentation": [
 		"وب‌سایت و مستندات"
 	],
+	"WebView package: %s": [
+		"بسته WebView: %s"
+	],
+	"WebView version: %s": [
+		"نسخه WebView: %s"
+	],
 	"Welcome to Joplin!\n\nType `:help shortcuts` for the list of keyboard shortcuts, or just `:help` for usage information.\n\nFor example, to create a notebook press `mb`; to create a note press `mn`.": [
 		"به joplin خوش آمدید! \n\nبرای فهرست میانبرهای صفحه‌کلید «:help shortcuts» یا برای اطلاعات نحوه استفاده فقط «:help» را تایپ کنید.\n\nبه عنوان مثال ، برای ایجاد یکدفترچه `mb` را بفشارید؛ برای ایجاد یک یادداشت `mn` را فشار دهید."
 	],
 	"Welcome!": [
 		"خوش آمدید!"
+	],
+	"What are plugins?": [
+		"افزونه‌ها چه کار می‌کنند؟"
 	],
 	"When creating a new note:": [
 		"در زمان ایجاد یادداشت جدید:"
@@ -3258,10 +3632,10 @@
 		"زمان ساخت یک فهرست کار جدید:"
 	],
 	"When enabled, the application will scan your attachments and extract the text from it. This will allow you to search for text in these attachments.": [
-		""
+		"وقتی فعال باشد، برنامه پیوست های شما را اسکن کرده و متن را از آن استخراج می کند. این به شما امکان می دهد متن را در این پیوست ها جستجو کنید."
 	],
 	"Window unresponsive.": [
-		""
+		"صفحه پاسخگو نیست."
 	],
 	"Words": [
 		"کلمات"
@@ -3282,7 +3656,7 @@
 		"شما در شرف پیوست کردن یک تصویر بزرگ هستید (%dx%d پیکسل). آیا می خواهید اندازه آن را قبل از پیوست کردن به %d پیکسل تغییر دهید؟"
 	],
 	"You are logged in into Joplin Cloud, you can leave this screen now.": [
-		""
+		"شما به سرویس ابری Joplin وارد شده اید، اکنون می توانید این صفحه را ترک کنید."
 	],
 	"You currently have no notebooks.": [
 		"شما در حال حاضر دفترچه‌ای ندارید."
@@ -3296,11 +3670,20 @@
 	"You may use the tool below to re-encrypt your data, for example if you know that some of your notes are encrypted with an obsolete encryption method.": [
 		"می‌توانید از ابزار زیر برای رمزگذاری مجدد داده‌های خود استفاده کنید، برای مثال اگر می‌دانید برخی از یادداشت‌های شما با روش رمزگذاری منسوخ رمزگذاری شده‌اند."
 	],
+	"You were unable to connect to Joplin Cloud. Please check your credentials and try again. Error:": [
+		"شما نتوانستید به سرویس ابری Joplin متصل شوید. لطفا اعتبارات خود را بررسی نمایید و دوباره امتحان کنید. خطا:"
+	],
+	"Your account doesn't have access to this feature": [
+		"حساب شما به این ویژگی دسترسی ندارد"
+	],
 	"Your choice: ": [
 		"انتخاب شما: "
 	],
 	"Your data is going to be re-encrypted and synced again.": [
 		"داده‌های شما دوباره رمزنگاری و همگام‌سازی خواهند شد."
+	],
+	"Your Joplin Cloud credentials are invalid, please login.": [
+		""
 	],
 	"Your password is needed to decrypt some of your data.": [
 		"گذرواژه شما برای رمزگشایی برخی از داده های شما مورد نیاز است."

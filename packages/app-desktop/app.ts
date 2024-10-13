@@ -5,7 +5,8 @@ import PluginService, { PluginSettings } from '@joplin/lib/services/plugins/Plug
 import resourceEditWatcherReducer, { defaultState as resourceEditWatcherDefaultState } from '@joplin/lib/services/ResourceEditWatcher/reducer';
 import PluginRunner from './services/plugins/PluginRunner';
 import PlatformImplementation from './services/plugins/PlatformImplementation';
-import shim from '@joplin/lib/shim';
+import type ShimType from '@joplin/lib/shim';
+const shim: typeof ShimType = require('@joplin/lib/shim').default;
 import AlarmService from '@joplin/lib/services/AlarmService';
 import AlarmServiceDriverNode from '@joplin/lib/services/AlarmServiceDriverNode';
 import Logger, { TargetType } from '@joplin/utils/Logger';
@@ -71,6 +72,7 @@ import OcrService from '@joplin/lib/services/ocr/OcrService';
 import OcrDriverTesseract from '@joplin/lib/services/ocr/drivers/OcrDriverTesseract';
 import SearchEngine from '@joplin/lib/services/search/SearchEngine';
 import { PackageInfo } from '@joplin/lib/versionInfo';
+import { CustomProtocolHandler } from './utils/customProtocols/handleCustomProtocols';
 import { refreshFolders } from '@joplin/lib/folders-screen-utils';
 
 const pluginClasses = [
@@ -88,6 +90,7 @@ class Application extends BaseApplication {
 	private checkAllPluginStartedIID_: any = null;
 	private initPluginServiceDone_ = false;
 	private ocrService_: OcrService;
+	private protocolHandler_: CustomProtocolHandler;
 
 	public constructor() {
 		super();
@@ -129,7 +132,7 @@ class Application extends BaseApplication {
 		}
 
 		if (action.type === 'SETTING_UPDATE_ONE' && action.key === 'ocr.enabled' || action.type === 'SETTING_UPDATE_ALL') {
-			this.setupOcrService();
+			void this.setupOcrService();
 		}
 
 		if (action.type === 'SETTING_UPDATE_ONE' && action.key === 'style.editor.fontFamily' || action.type === 'SETTING_UPDATE_ALL') {
@@ -165,6 +168,12 @@ class Application extends BaseApplication {
 
 		if (this.hasGui() && ((action.type === 'SETTING_UPDATE_ONE' && ['themeAutoDetect', 'theme', 'preferredLightTheme', 'preferredDarkTheme'].includes(action.key)) || action.type === 'SETTING_UPDATE_ALL')) {
 			this.handleThemeAutoDetect();
+		}
+
+		if (action.type === 'PLUGIN_ADD') {
+			const plugin = PluginService.instance().pluginById(action.plugin.id);
+			this.protocolHandler_.allowReadAccessToDirectory(plugin.baseDir);
+			this.protocolHandler_.allowReadAccessToDirectory(plugin.dataDir);
 		}
 
 		return result;
@@ -204,7 +213,7 @@ class Application extends BaseApplication {
 	public updateEditorFont() {
 		const fontFamilies = [];
 		if (Setting.value('style.editor.fontFamily')) fontFamilies.push(`"${Setting.value('style.editor.fontFamily')}"`);
-		fontFamilies.push('Avenir, Arial, sans-serif');
+		fontFamilies.push('\'Avenir Next\', Avenir, Arial, sans-serif');
 
 		// The '*' and '!important' parts are necessary to make sure Russian text is displayed properly
 		// https://github.com/laurent22/joplin/issues/155
@@ -353,16 +362,29 @@ class Application extends BaseApplication {
 		Setting.setValue('wasClosedSuccessfully', false);
 	}
 
-	private setupOcrService() {
+	private async setupOcrService() {
+		if (Setting.value('ocr.clearLanguageDataCache')) {
+			Setting.setValue('ocr.clearLanguageDataCache', false);
+			try {
+				await OcrDriverTesseract.clearLanguageDataCache();
+			} catch (error) {
+				this.logger().warn('OCR: Failed to clear language data cache.', error);
+			}
+		}
+
 		if (Setting.value('ocr.enabled')) {
+
 			if (!this.ocrService_) {
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 				const Tesseract = (window as any).Tesseract;
 
 				const driver = new OcrDriverTesseract(
 					{ createWorker: Tesseract.createWorker },
-					`${bridge().buildDir()}/tesseract.js/worker.min.js`,
-					`${bridge().buildDir()}/tesseract.js-core`,
+					{
+						workerPath: `${bridge().buildDir()}/tesseract.js/worker.min.js`,
+						corePath: `${bridge().buildDir()}/tesseract.js-core`,
+						languageDataPath: Setting.value('ocr.languageDataPath') || null,
+					},
 				);
 
 				this.ocrService_ = new OcrService(driver);
@@ -382,6 +404,16 @@ class Application extends BaseApplication {
 		eventManager.on(EventName.ResourceChange, handleResourceChange);
 	}
 
+	private setupAutoUpdaterService() {
+		if (Setting.value('featureFlag.autoUpdaterServiceEnabled')) {
+			bridge().electronApp().initializeAutoUpdaterService(
+				Logger.create('AutoUpdaterService'),
+				Setting.value('env') === 'dev',
+				Setting.value('autoUpdate.includePreReleases'),
+			);
+		}
+	}
+
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public async start(argv: string[], startOptions: StartOptions = null): Promise<any> {
 		// If running inside a package, the command line, instead of being "node.exe <path> <flags>" is "joplin.exe <flags>" so
@@ -389,6 +421,8 @@ class Application extends BaseApplication {
 		if (!bridge().electronIsDev()) argv.splice(1, 0, '.');
 
 		argv = await super.start(argv, startOptions);
+
+		bridge().setLogFilePath(Logger.globalLogger.logFilePath());
 
 		await this.applySettingsSideEffects();
 
@@ -415,14 +449,31 @@ class Application extends BaseApplication {
 		// Loads app-wide styles. (Markdown preview-specific styles loaded in app.js)
 		await injectCustomStyles('appStyles', Setting.customCssFilePath(Setting.customCssFilenames.JOPLIN_APP));
 
+		this.setupAutoUpdaterService();
+
 		AlarmService.setDriver(new AlarmServiceDriverNode({ appName: packageInfo.build.appId }));
 		AlarmService.setLogger(reg.logger());
 
+		reg.setDispatch(this.dispatch.bind(this));
 		reg.setShowErrorMessageBoxHandler((message: string) => { bridge().showErrorMessageBox(message); });
 
 		if (Setting.value('flagOpenDevTools')) {
 			bridge().openDevTools();
 		}
+
+		bridge().electronApp().initializeCustomProtocolHandler(
+			Logger.create('handleCustomProtocols'),
+		);
+		this.protocolHandler_ = bridge().electronApp().getCustomProtocolHandler();
+		this.protocolHandler_.allowReadAccessToDirectory(__dirname); // App bundle directory
+		this.protocolHandler_.allowReadAccessToDirectory(Setting.value('cacheDir'));
+		this.protocolHandler_.allowReadAccessToDirectory(Setting.value('resourceDir'));
+		// this.protocolHandler_.allowReadAccessTo(Setting.value('tempDir'));
+		// For now, this doesn't seem necessary:
+		//  this.protocolHandler_.allowReadAccessTo(Setting.value('profileDir'));
+		// If it is needed, note that they decrease the security of the protcol
+		// handler, and, as such, it may make sense to also limit permissions of
+		// allowed pages with a Content Security Policy.
 
 		PluginManager.instance().dispatch_ = this.dispatch.bind(this);
 		PluginManager.instance().setLogger(reg.logger());
@@ -465,7 +516,7 @@ class Application extends BaseApplication {
 		Setting.dispatchUpdateAll();
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-		await refreshFolders((action: any) => this.dispatch(action));
+		await refreshFolders((action: any) => this.dispatch(action), '');
 
 		const tags = await Tag.allWithNotes();
 
@@ -531,17 +582,19 @@ class Application extends BaseApplication {
 		// Note: Auto-update is a misnomer in the code.
 		// The code below only checks, if a new version is available.
 		// We only allow Windows and macOS users to automatically check for updates
-		if (shim.isWindows() || shim.isMac()) {
-			const runAutoUpdateCheck = () => {
-				if (Setting.value('autoUpdateEnabled')) {
-					void checkForUpdates(true, bridge().window(), { includePreReleases: Setting.value('autoUpdate.includePreReleases') });
-				}
-			};
+		if (!Setting.value('featureFlag.autoUpdaterServiceEnabled')) {
+			if (shim.isWindows() || shim.isMac()) {
+				const runAutoUpdateCheck = () => {
+					if (Setting.value('autoUpdateEnabled')) {
+						void checkForUpdates(true, bridge().window(), { includePreReleases: Setting.value('autoUpdate.includePreReleases') });
+					}
+				};
 
-			// Initial check on startup
-			shim.setTimeout(() => { runAutoUpdateCheck(); }, 5000);
-			// Then every x hours
-			shim.setInterval(() => { runAutoUpdateCheck(); }, 12 * 60 * 60 * 1000);
+				// Initial check on startup
+				shim.setTimeout(() => { runAutoUpdateCheck(); }, 5000);
+				// Then every x hours
+				shim.setInterval(() => { runAutoUpdateCheck(); }, 12 * 60 * 60 * 1000);
+			}
 		}
 
 		initializeUserFetcher();

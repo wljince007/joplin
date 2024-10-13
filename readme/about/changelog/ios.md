@@ -1,5 +1,194 @@
 # Joplin iOS Changelog
 
+## [ios-v13.1.5](https://github.com/laurent22/joplin/releases/tag/ios-v13.1.5) - 2024-10-11T22:29:29Z
+
+- Improved: Added feature flag to disable sync lock support (#10925) (#10407)
+- Improved: Automatically detect and use operating system theme by default (5beb80b)
+- Improved: Downgrade CodeMirror packages to fix various Android regressions (#11170 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Make feature flags advanced settings by default (700ffa2)
+- Improved: Make pressing "back" navigate to the previous note after following a link (#11086) (#11082 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Plugins: Name webview root attribute so that it can be styled (75b8caf)
+- Improved: Scroll dropdown to selected value when first opened (#11091 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Show loading indicator while loading search results (#11104 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Support permanent note deletion on mobile  (#10786) (#10763 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Updated packages @bam.tech/react-native-image-resizer (v3.0.10), @js-draw/material-icons (v1.20.3), @react-native-clipboard/clipboard (v1.14.1), @react-native-community/datetimepicker (v8.0.1), @react-native/babel-preset (v0.74.85), @react-native/metro-config (v0.74.85), @rollup/plugin-commonjs (v25.0.8), @rollup/plugin-replace (v5.0.7), async-mutex (v0.5.0), dayjs (v1.11.11), glob (v10.4.5), js-draw (v1.20.3), jsdom (v24.1.0), katex (v0.16.11), markdown-it-ins (v4), markdown-it-sup (v2), react, react-native-device-info (v10.14.0), react-native-document-picker (v9.3.0), react-native-localize (v3.1.0), react-native-safe-area-context (v4.10.7), react-native-share (v10.2.1), react-native-webview (v13.8.7), react-native-zip-archive (v6.1.2), sass (v1.77.6), sharp (v0.33.4), stream (v0.0.3), tesseract.js (v5.1.0), turndown (v7.2.0)
+- Improved: Upgrade CodeMirror packages (#11034 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Use fade animation for edit link dialog (#11090 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Accessibility: Fix sidebar broken in right-to-left mode, improve screen reader accessibility (#11056) (#11028 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Decrypt master keys only as needed (#10990) (#10856 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Delete revisions on the sync target when deleted locally (#11035) (#11017 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Drawing: Fix clicking "cancel" after starting a new drawing in editing mode creates an empty resource (#10986 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix "Enable auto-updates" enabled by default and visible on unsupported platforms (#10897) (#10896 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix BMP image rendering in the Markdown viewer (#10915) (#10914 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix automatic resource download mode (#11144) (#11134 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix incorrect list switching behavior (#11137) (#11135 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix new note/edit buttons only work if pressed quickly (#11185) (#11183 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix regression: Search screen not hidden when cached for search result navigation (#11131) (#11130 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix toolbar overflow menu is invisible (#10871) (#10867 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix unable to change incorrect decryption password if the same as the master password (#11026 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fixed italic support in Fountain documents (5fdd088)
+- Fixed: Improve performance when there are many selected items (#11067) (#11065 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Markdown editor: Fix toggling bulleted lists when items start with asterisks (#10902) (#10891 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Move accessibility focus to the first note action menu item on open (#11031) (#10253 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: WebDAV synchronisation not working because of URL encoding differences (#11076) (#10608 by [@pedr](https://github.com/pedr))
+
+## [ios-v13.1.3](https://github.com/laurent22/joplin/releases/tag/ios-v13.1.3) - 2024-08-10T13:08:24Z
+
+- Improved: Updated packages @react-native-community/netinfo (v11.3.2)
+- Fixed: Fix WebDAV sync on mobile (#10849) (#10848 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix crash on opening the sidebar (#10852 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
+## [ios-v13.1.1](https://github.com/laurent22/joplin/releases/tag/ios-v13.1.1) - 2024-08-09T11:15:15Z
+
+- Improved: Improve RTL support in the Markdown editor (#10810 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Include commit information in version information screen (#10829 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Support building for web (#10650 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Support pasting images (#10751) (#9017 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Updated packages @react-native-community/geolocation (v3.2.1), @react-native-community/slider (v4.5.2), glob (v10.3.12), jsdom (v23.2.0), react-native-device-info (v10.13.1), react-native-get-random-values (v1.11.0), react-native-webview (v13.8.4), sharp (v0.33.3), style-to-js (v1.1.12), tar (v6.2.1)
+- Improved: Upgrade react-native-webview to 13.8.6 to fix CI (#10761 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix dayjs-related startup error (#10652 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix math is invisible in certain mermaid diagrams (#10820) (#10785 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Plugins: Fix incorrect Node exports emulation (#10776 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Remove search bar from plugins screen (#10648) (#10596 by Siddhant Paritosh Rao)
+- Fixed: Show notification in case Joplin Cloud credential is not valid anymore (#10649) (#10645 by [@pedr](https://github.com/pedr))
+
+## [ios-v13.0.7](https://github.com/laurent22/joplin/releases/tag/ios-v13.0.7) - 2024-07-28T14:07:03Z
+
+- Fixed: #10677: Following a link to a previously open note wouldn't work (#10750) (#10677 by [@pedr](https://github.com/pedr))
+- Fixed: Fix manual resource download mode (#10748 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
+## [ios-v13.0.6](https://github.com/laurent22/joplin/releases/tag/ios-v13.0.6) - 2024-07-06T11:22:58Z
+
+- Fixed: Fix sidebar performance regression with many nested notebooks (#10676) (#10674 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
+## [ios-v13.0.5](https://github.com/laurent22/joplin/releases/tag/ios-v13.0.5) - 2024-07-01T15:47:53Z
+
+- Improved: Set min version for synchronising to 3.0.0 (e4b8976)
+- Fixed: Show notification in case Joplin Cloud credential is not valid anymore (#10649) (#10645 by [@pedr](https://github.com/pedr))
+
+## [ios-v13.0.4](https://github.com/laurent22/joplin/releases/tag/ios-v13.0.4) - 2024-06-29T10:21:04Z
+
+- Updated German and Chinese translation
+- Fixed: Fix refocusing the note editor (#10644) (#10637 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix voice typing URL setting incorrectly visible (#10643 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
+## [ios-v13.0.3](https://github.com/laurent22/joplin/releases/tag/ios-v13.0.3) - 2024-06-19T15:29:15Z
+
+- Improved: Don't render empty title page for Fountain (#10631 by [@XPhyro](https://github.com/XPhyro))
+- Improved: Don't show an "expand" arrow by "Installed plugins" when no plugins are installed (#10583 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Implement callback url (#9803) (#8639 by [@tiberiusteng](https://github.com/tiberiusteng))
+- Improved: Make mobile plugin settings screen UI closer to desktop (#10598) (#10592 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Mark plugin support as in beta (#10585 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Move mobile plugin setting tabs under a separate section (#10600) (#10594 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Start synchronisation just after login is complete (#10574 by [@pedr](https://github.com/pedr))
+- Improved: Update farsi/persian translation fa.po (#10634 by [@mimeyn](https://github.com/mimeyn))
+- Improved: Updated packages @react-native-community/netinfo (v11.3.1), chokidar (v3.6.0), follow-redirects (v1.15.6), jsdom (v23), react-native-image-picker (v7.1.1), react-native-webview (v13.8.1), sass (v1.71.0), style-to-js (v1.1.11), turndown (v7.1.3)
+- Fixed: English: Use the plural form of a localization for negative and zero items (#10582) (#10581 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix cmd-i no longer italicizes text (#10604 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix plugin list not cached in config screen (#10599) (#10593 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix selected note changes on moving to a different folder (#10630) (#10589 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Not able to change notebook when using 'New Note' quick action (#10252) (#10588 by [@pedr](https://github.com/pedr))
+- Fixed: Plugin settings screen: Fix plugin states not set correctly when installing multiple plugins at once (#10580 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Plugin settings: Fix plugins without settings can't be disabled without reinstall (#10579 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
+## [ios-v13.0.2](https://github.com/laurent22/joplin/releases/tag/ios-v13.0.2) - 2024-06-12T20:21:28Z
+
+- New: Add Joplin Cloud account information to configuration screen (#10553 by [@pedr](https://github.com/pedr))
+- New: Add Privacy manifest file (#10406 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- New: Add button on Synchronization to Joplin Cloud login screen (#10569 by [@pedr](https://github.com/pedr))
+- Improved: Dismiss dialogs on background tap (#10557 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Hide links to login after process is successful (#10571 by [@pedr](https://github.com/pedr))
+- Improved: Implement plugin screen redesign (#10465 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Improve dialog styling on large and notched screens (#10470 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Improves formatting of log statements (aac8d58)
+- Improved: Make editor styles closer to desktop (#10377 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Make most plugins default to being desktop-only (#10376) (#10360 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Plugin API: Implement the `newNote` command (#10524 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Plugin support: Simplify reporting plugin issues (#10319 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Plugins: Make panel opening/closing more consistent with desktop (#10385 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Plugins: Show information page before enabling plugin support (#10348 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Settings screen: Show touch feedback when pressing a tab (#10544 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Share screen: Update headings and labels for consistency with desktop (#10395 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Show WebView version in settings (#10518 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Simplify Dropbox sync workaround (#10415 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Support copying app information (#10336 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Update Mermaid to v10.9.1 (#10475 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Update js-draw to version 1.20.2 (#10438 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Updated packages @adobe/css-tools (v4.3.3), react, react-native-device-info (v10.12.1), react-native-document-picker (v9.1.1), react-native-paper (v5.12.3), sass (v1.70.0), tesseract.js (v5.0.5)
+- Improved: Upgrade KaTeX to v0.16.10 (#10570 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Upgrade to React Native 0.74.1 (#10401 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: After deleting the last note from the conflicts folder, the application state is invalid (#10189)
+- Fixed: Automatically set focus on title or body when creating a new note (#10237)
+- Fixed: Do not invite user to create new notes in the trash folder (#10356) (#10191 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix Dropbox sync (#10400) (#10396 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix Dropbox sync for large file collections (#10411) (#10396 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix accepting encrypted shared notebooks (#10429) (#10409 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix logger tests by adding time (#10433 by [@pedr](https://github.com/pedr))
+- Fixed: Fix nonbreaking spaces and CRLF break search for adjacent words (#10417 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix plugins aren't visible after switching to a new profile (#10386 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix plugins not reloaded when the plugin runner reloads (#10540 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix quickly enabling/disabling multiple plugins can lead to errors and missing plugins (#10380 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix sync icon off-center (#10350) (#10351 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fixed app for iOS 12 (966fe38)
+- Fixed: Maintain cursor position when changing list indentation (#10441) (#10439 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Plugins: Fix API incompatibility in arguments to `onMessage` listeners in panels (#10375 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+
+## [ios-v12.14.8](https://github.com/laurent22/joplin/releases/tag/ios-v12.14.8) - 2024-05-08T13:40:01Z
+
+- Fixed: Fix Dropbox sync for large file collections (#10411) (#10396 by Henry Heino)
+- Fixed: Fixed app for iOS 12 (966fe38)
+
+## [ios-v12.14.7](https://github.com/laurent22/joplin/releases/tag/ios-v12.14.7) - 2024-05-07T16:24:05Z
+
+- New: Add Privacy manifest file (#10406 by Henry Heino)
+- Fixed: Allow pasting URLs copied from the share sheet (#10048) (#10047 by Henry Heino)
+- Fixed: Fix Dropbox sync (#10400) (#10396 by Henry Heino)
+
+## [ios-v13.0.1](https://github.com/laurent22/joplin/releases/tag/ios-v13.0.1) - 2024-04-20T10:38:22Z
+
+- New: Add support for plugin panels and dialogs (#10121 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Add trash folder (#9671) (#483)
+- Improved: Added empty trash option on long pressing the trash folder (#10120) (#10092 by [@Sidd-R](https://github.com/Sidd-R))
+- Improved: Allow installing recommended plugins (#10223) (#10154 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Allow marking a plugin as mobile-only or desktop-only (#10229) (#10206 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Allow marking items as "ignored" in sync status  (#10261) (#10245 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Avoid unnecessary requests if Joplin Cloud credentials are empty (#10256 by [@pedr](https://github.com/pedr))
+- Improved: Bump @codemirror/view version. (#10174 by [@itzTheMeow](https://github.com/itzTheMeow))
+- Improved: Change Joplin Cloud login process to allow MFA via browser (#9776 by [@pedr](https://github.com/pedr))
+- Improved: Default to tab indentation for consistency with desktop platforms (#10242 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Display a message when Joplin Cloud user don't have access to email to note feature (#10322 by [@pedr](https://github.com/pedr))
+- Improved: Display recommended plugin alert (#10281) (#10207 by [@DarkFalc0n](https://github.com/DarkFalc0n))
+- Improved: Do not repeat failed requests with ENOTFOUND error (#6173)
+- Improved: Fix conflicts notebook doesn't work with the trash feature (#10104) (#10073 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Improve focus handling (00084c5)
+- Improved: Log user actions (deletions) (#9585) (#9465 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Make tables horizontally scrollable (#10161 by [@wljince007](https://github.com/wljince007))
+- Improved: Plugin API: Improve support for the Kanban and similar plugins (#10247 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Show plugin versions in settings (#10289) (#10288 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Show sync version and client id in More Info (#10254 by Self Not Found)
+- Improved: Support accepting Joplin Cloud shares (#10300 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Support description banners on plugin-registered settings screens (#10286 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Support importing from JEX files (#10269 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Improved: Update farsi/persian translation fa.po (#10181 by [@mimeyn](https://github.com/mimeyn))
+- Improved: Upgrade CodeMirror 6 packages (#10032) (#10031 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Allow pasting URLs copied from the share sheet (#10048) (#10047 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Email to note address not presented in configuration screen before synchronisation (#10293) (#10292 by [@pedr](https://github.com/pedr))
+- Fixed: Fix "new note" button is shown in the trash notebook (#10227) (#10188 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix clicking on a link results in a blank screen (#10168) (#10166 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix dropdowns invisible when opening settings by clicking "synchronize" (#10271) (#10270 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix error on retry or ignore attachment too large error (#10314) (#10313 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix note editor's settings and plugins updated on every keystroke (#10116 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix plugin API memory leak (#10115 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix shared data lost if Joplin is closed immediately after receiving a share (#10171) (#10170 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Fix trash folder sometimes has wrong icon (#10173) (#10172 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Improve note editor performance when quickly entering text (#10134) (#10130 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: New note button crashes app when there are no notebooks (#10087) (#10065 by [@Sidd-R](https://github.com/Sidd-R))
+- Fixed: Plugin API: Fix crash when a plugin registers an enum setting with no default (#10263 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Plugin API: Fix error when calling `plugins.dataDir` (#10262 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Plugins: Fix event listener memory leak when disabling/uninstalling plugins (#10280 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Plugins: Fix warning after reloading plugins (#10165 by [@personalizedrefrigerator](https://github.com/personalizedrefrigerator))
+- Fixed: Shows only the real folders in the dropdown of parent folders. (#10147) (#10143 by [@Sidd-R](https://github.com/Sidd-R))
+
 ## [ios-v12.14.6](https://github.com/laurent22/joplin/releases/tag/ios-v12.14.6) - 2024-03-01T18:04:47Z
 
 - Improved: Immediately sort notes after toggling a checkbox (5820f63)

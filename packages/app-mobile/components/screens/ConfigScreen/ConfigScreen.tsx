@@ -1,14 +1,13 @@
 import * as React from 'react';
 import { Platform, Linking, View, Switch, ScrollView, Text, TouchableOpacity, Alert, PermissionsAndroid, Dimensions, AccessibilityInfo } from 'react-native';
-import Setting, { AppType, SettingItem, SettingMetadataSection } from '@joplin/lib/models/Setting';
+import Setting, { AppType, SettingMetadataSection } from '@joplin/lib/models/Setting';
 import NavService from '@joplin/lib/services/NavService';
 import SearchEngine from '@joplin/lib/services/search/SearchEngine';
 import checkPermissions from '../../../utils/checkPermissions';
 import setIgnoreTlsErrors from '../../../utils/TlsUtils';
 import { reg } from '@joplin/lib/registry';
 import { State } from '@joplin/lib/reducer';
-const { BackButtonService } = require('../../../services/back-button.js');
-const VersionInfo = require('react-native-version-info').default;
+import BackButtonService from '../../../services/BackButtonService';
 import { connect } from 'react-redux';
 import ScreenHeader from '../../ScreenHeader';
 import { _ } from '@joplin/lib/locale';
@@ -20,19 +19,23 @@ import biometricAuthenticate from '../../biometrics/biometricAuthenticate';
 import configScreenStyles, { ConfigScreenStyles } from './configScreenStyles';
 import NoteExportButton, { exportButtonDescription, exportButtonDefaultTitle } from './NoteExportSection/NoteExportButton';
 import SettingsButton from './SettingsButton';
-import Clipboard from '@react-native-community/clipboard';
+import Clipboard from '@react-native-clipboard/clipboard';
 import { ReactElement, ReactNode } from 'react';
 import SectionHeader from './SectionHeader';
 import ExportProfileButton, { exportProfileButtonTitle } from './NoteExportSection/ExportProfileButton';
 import SettingComponent from './SettingComponent';
 import ExportDebugReportButton, { exportDebugReportTitle } from './NoteExportSection/ExportDebugReportButton';
 import SectionSelector from './SectionSelector';
-import { Button, TextInput } from 'react-native-paper';
+import { TextInput, List } from 'react-native-paper';
 import PluginService, { PluginSettings } from '@joplin/lib/services/plugins/PluginService';
 import PluginStates, { getSearchText as getPluginStatesSearchText } from './plugins/PluginStates';
 import PluginUploadButton, { canInstallPluginsFromFile, buttonLabel as pluginUploadButtonSearchText } from './plugins/PluginUploadButton';
 import NoteImportButton, { importButtonDefaultTitle, importButtonDescription } from './NoteExportSection/NoteImportButton';
 import SectionDescription from './SectionDescription';
+import EnablePluginSupportPage from './plugins/EnablePluginSupportPage';
+import getVersionInfoText from '../../../utils/getVersionInfoText';
+import JoplinCloudConfig, { emailToNoteDescription, emailToNoteLabel } from './JoplinCloudConfig';
+import shim from '@joplin/lib/shim';
 
 interface ConfigScreenState {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
@@ -84,6 +87,10 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 
 		shared.init(reg);
 	}
+
+	private goToJoplinCloudLogin_ = async () => {
+		await NavService.go('JoplinCloudLogin');
+	};
 
 	private checkSyncConfig_ = async () => {
 		if (this.state.settings['sync.target'] === SyncTargetRegistry.nameToId('joplinCloud')) {
@@ -251,29 +258,15 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 		return this.state.changedSettingKeys.length > 0;
 	}
 
-	private promptSaveChanges(): Promise<void> {
-		return new Promise(resolve => {
-			if (this.hasUnsavedChanges()) {
-				const dialogTitle: string|null = null;
-				Alert.alert(
-					dialogTitle,
-					_('There are unsaved changes.'),
-					[{
-						text: _('Save changes'),
-						onPress: async () => {
-							await this.saveButton_press();
-							resolve();
-						},
-					},
-					{
-						text: _('Discard changes'),
-						onPress: () => resolve(),
-					}],
-				);
-			} else {
-				resolve();
+	private async promptSaveChanges(): Promise<void> {
+		if (this.hasUnsavedChanges()) {
+			const response = await shim.showMessageBox(_('There are unsaved changes.'), {
+				buttons: [_('Save changes'), _('Discard changes')],
+			});
+			if (response === 0) {
+				await this.saveButton_press();
 			}
-		});
+		}
 	}
 
 	private handleNavigateToNewScreen = async (): Promise<boolean> => {
@@ -345,6 +338,7 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 				description={options?.description}
 				statusComponent={options?.statusComp}
 				styles={this.styles()}
+				disabled={options?.disabled}
 			/>
 		);
 	}
@@ -387,7 +381,7 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 		const addSettingComponent = (
 			component: ReactElement,
 			relatedText: string|string[],
-			settingMetadata?: SettingItem,
+			settingMetadata?: { advanced?: boolean },
 		) => {
 			const hiddenBySearch = this.state.searching && !matchesSearchQuery(relatedText);
 			if (component && !hiddenBySearch) {
@@ -459,12 +453,16 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 						</View>
 					);
 
+					if (settings['sync.target'] === SyncTargetRegistry.nameToId('joplinCloud')) {
+						addSettingButton('go_to_joplin_cloud_login_button', _('Connect to Joplin Cloud'), this.goToJoplinCloudLogin_);
+					}
+
 					addSettingButton('check_sync_config_button', _('Check synchronisation configuration'), this.checkSyncConfig_, { statusComp: statusComp });
 				}
 			}
 
 			const settingComp = this.settingToComponent(md.key, settings[md.key]);
-			const relatedText = [md.label?.() ?? '', md.description?.() ?? ''];
+			const relatedText = [md.label?.() ?? '', md.description?.(AppType.Mobile) ?? ''];
 			addSettingComponent(
 				settingComp,
 				relatedText,
@@ -481,29 +479,46 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 				shared.updateSettingValue(this, pluginStatesKey, value);
 			};
 
-			addSettingComponent(
-				<PluginStates
-					key={'plugin-states'}
-					styles={this.styles()}
-					themeId={this.props.themeId}
-					pluginSettings={settings[pluginStatesKey]}
-
-					updatePluginStates={updatePluginStates}
-					shouldShowBasedOnSearchQuery={this.state.searching ? matchesSearchQuery : null}
-				/>,
-				getPluginStatesSearchText(),
-			);
-
-			if (canInstallPluginsFromFile()) {
+			if (settings['plugins.pluginSupportEnabled']) {
 				addSettingComponent(
-					<PluginUploadButton
-						key='plugins-install-from-file'
+					<PluginStates
+						key={'plugin-states'}
+						styles={this.styles()}
+						themeId={this.props.themeId}
 						pluginSettings={settings[pluginStatesKey]}
+
 						updatePluginStates={updatePluginStates}
+						shouldShowBasedOnSearchQuery={this.state.searching ? matchesSearchQuery : null}
 					/>,
-					pluginUploadButtonSearchText(),
+					getPluginStatesSearchText(),
+				);
+
+				if (canInstallPluginsFromFile()) {
+					addSettingComponent(
+						<PluginUploadButton
+							key='plugins-install-from-file'
+							pluginSettings={settings[pluginStatesKey]}
+							updatePluginStates={updatePluginStates}
+							styles={this.styles()}
+						/>,
+						pluginUploadButtonSearchText(),
+						{ advanced: true },
+					);
+				}
+			} else {
+				const enablePluginSupport = () => {
+					shared.updateSettingValue(this, 'plugins.pluginSupportEnabled', true);
+				};
+				addSettingComponent(
+					<EnablePluginSupportPage
+						key='plugin-support-disabled-screen'
+						themeId={this.props.themeId}
+						onEnablePluginSupport={enablePluginSupport}
+					/>,
+					['plugins', _('Plugins')],
 				);
 			}
+
 		}
 
 		if (section.name === 'sync') {
@@ -511,24 +526,16 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 		}
 
 		if (section.name === 'joplinCloud') {
-			const label = _('Email to note');
-			const description = _('Any email sent to this address will be converted into a note and added to your collection. The note will be saved into the Inbox notebook');
 			addSettingComponent(
-				<View key="joplinCloud">
-					<View style={this.styles().styleSheet.settingContainerNoBottomBorder}>
-						<Text style={this.styles().styleSheet.settingText}>{label}</Text>
-						<Text style={this.styles().styleSheet.settingTextEmphasis}>{this.props.settings['sync.10.inboxEmail']}</Text>
-					</View>
-					{
-						this.renderButton(
-							'sync.10.inboxEmail',
-							_('Copy to clipboard'),
-							() => Clipboard.setString(this.props.settings['sync.10.inboxEmail']),
-							{ description },
-						)
-					}
-				</View>,
-				[label, description],
+				<JoplinCloudConfig
+					key="joplin-cloud-config"
+					accountType={this.props.settings['sync.10.accountType']}
+					inboxEmail={this.props.settings['sync.10.inboxEmail']}
+					userEmail={this.props.settings['sync.10.userEmail']}
+					website={this.props.settings['sync.10.website']}
+					styles={this.styles()}
+				/>,
+				[emailToNoteDescription(), emailToNoteLabel()],
 			);
 		}
 
@@ -539,7 +546,7 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 			addSettingButton('fix_search_engine_index', this.state.fixingSearchIndex ? _('Fixing search index...') : _('Fix search index'), this.fixSearchEngineIndexButtonPress_, { disabled: this.state.fixingSearchIndex, description: _('Use this to rebuild the search index if there is a problem with search. It may take a long time depending on the number of notes.') });
 			const syncTargetInfo = SyncTargetRegistry.infoById(this.state.settings['sync.target']);
 			if (syncTargetInfo.supportsShare) {
-				addSettingButton('manage_shares_button', _('Manage shared folders'), this.manageSharesPress_);
+				addSettingButton('manage_shares_button', _('Manage shared notebooks'), this.manageSharesPress_);
 			}
 		}
 
@@ -592,13 +599,12 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 			addSettingLink('website_link', _('Joplin website'), 'https://joplinapp.org/');
 			addSettingLink('privacy_link', _('Privacy Policy'), 'https://joplinapp.org/privacy/');
 
-			addSettingText('version_info_app', `Joplin ${VersionInfo.appVersion}`);
-			addSettingText('version_info_db', _('Database v%s', reg.db().version()));
-			addSettingText('version_info_sync', _('Sync Version: %s', Setting.value('syncVersion')));
-			addSettingText('version_info_client_id', _('Client ID: %s', Setting.value('clientId')));
-			addSettingText('version_info_fts', _('FTS enabled: %d', this.props.settings['db.ftsEnabled']));
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-			addSettingText('version_info_hermes', _('Hermes enabled: %d', (global as any).HermesInternal ? 1 : 0));
+			const versionInfoText = getVersionInfoText(settings['plugins.states']);
+
+			addSettingText('version_info', versionInfoText);
+			addSettingButton('copy_app_info', _('Copy version info'), () => {
+				Clipboard.setString(versionInfoText);
+			});
 
 			const featureFlagKeys = Setting.featureFlagKeys(AppType.Mobile);
 			if (featureFlagKeys.length) {
@@ -638,19 +644,15 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 		const renderAdvancedSettings = () => {
 			if (!advancedSettingComps.length) return null;
 
-			const toggleAdvancedLabel = this.state.showAdvancedSettings ? _('Hide Advanced Settings') : _('Show Advanced Settings');
+			const toggleAdvancedLabel = _('Advanced settings');
 			return (
-				<>
-					<Button
-						style={{ marginBottom: 20 }}
-						icon={this.state.showAdvancedSettings ? 'menu-down' : 'menu-right'}
-						onPress={() => this.setState({ showAdvancedSettings: !this.state.showAdvancedSettings })}
-					>
-						<Text>{toggleAdvancedLabel}</Text>
-					</Button>
-
+				<List.Accordion
+					title={toggleAdvancedLabel}
+					expanded={this.state.showAdvancedSettings}
+					onPress={() => this.setState({ showAdvancedSettings: !this.state.showAdvancedSettings })}
+				>
 					{this.state.showAdvancedSettings ? advancedSettingComps : null}
-				</>
+				</List.Accordion>
 			);
 		};
 
@@ -815,8 +817,11 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 		}
 
 		let screenHeadingText = _('Configuration');
+		let showSearchButton = true;
+
 		if (currentSectionName) {
 			screenHeadingText = Setting.sectionNameToLabel(currentSectionName);
+			showSearchButton = currentSectionName !== 'plugins';
 		}
 
 		return (
@@ -824,7 +829,7 @@ class ConfigScreenComponent extends BaseScreenComponent<ConfigScreenProps, Confi
 				<ScreenHeader
 					title={screenHeadingText}
 					showSaveButton={true}
-					showSearchButton={true}
+					showSearchButton={showSearchButton}
 					showSideMenuButton={false}
 					saveButtonDisabled={!this.hasUnsavedChanges()}
 					onSaveButtonPress={this.saveButton_press}

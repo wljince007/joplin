@@ -9,7 +9,7 @@ import { ResourceEntity, ResourceLocalStateEntity, ResourceOcrStatus, SqlQuery }
 import ResourceLocalState from './ResourceLocalState';
 import * as pathUtils from '../path-utils';
 import { safeFilename } from '../path-utils';
-const { mime } = require('../mime-utils.js');
+import * as mime from '../mime-utils';
 const { FsDriverDummy } = require('../fs-driver-dummy.js');
 import JoplinError from '../JoplinError';
 import itemCanBeEncrypted from './utils/itemCanBeEncrypted';
@@ -25,6 +25,17 @@ import { unique } from '../array';
 import ActionLogger from '../utils/ActionLogger';
 import isSqliteSyntaxError from '../services/database/isSqliteSyntaxError';
 import { internalUrl, isResourceUrl, isSupportedImageMimeType, resourceFilename, resourceFullPath, resourcePathToId, resourceRelativePath, resourceUrlToId } from './utils/resourceUtils';
+
+export const resourceOcrStatusToString = (status: ResourceOcrStatus) => {
+	const s = {
+		[ResourceOcrStatus.Todo]: _('Idle'),
+		[ResourceOcrStatus.Processing]: _('Processing'),
+		[ResourceOcrStatus.Error]: _('Error'),
+		[ResourceOcrStatus.Done]: _('Done'),
+	};
+
+	return s[status];
+};
 
 export default class Resource extends BaseItem {
 
@@ -65,7 +76,7 @@ export default class Resource extends BaseItem {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 	public static fetchStatuses(resourceIds: string[]): Promise<any[]> {
 		if (!resourceIds.length) return Promise.resolve([]);
-		return this.db().selectAll(`SELECT resource_id, fetch_status FROM resource_local_states WHERE resource_id IN ("${resourceIds.join('","')}")`);
+		return this.db().selectAll(`SELECT resource_id, fetch_status FROM resource_local_states WHERE resource_id IN ('${resourceIds.join('\',\'')}')`);
 	}
 
 	public static sharedResourceIds(): Promise<string[]> {
@@ -96,7 +107,7 @@ export default class Resource extends BaseItem {
 	}
 
 	public static async resetFetchErrorStatus(resourceId: string) {
-		await this.db().exec('UPDATE resource_local_states SET fetch_status = ?, fetch_error = "" WHERE resource_id = ?', [Resource.FETCH_STATUS_IDLE, resourceId]);
+		await this.db().exec('UPDATE resource_local_states SET fetch_status = ?, fetch_error = \'\' WHERE resource_id = ?', [Resource.FETCH_STATUS_IDLE, resourceId]);
 		await this.resetOcrStatus(resourceId);
 	}
 
@@ -357,7 +368,7 @@ export default class Resource extends BaseItem {
 	public static async downloadedButEncryptedBlobCount(excludedIds: string[] = null) {
 		let excludedSql = '';
 		if (excludedIds && excludedIds.length) {
-			excludedSql = `AND resource_id NOT IN ("${excludedIds.join('","')}")`;
+			excludedSql = `AND resource_id NOT IN ('${excludedIds.join('\',\'')}')`;
 		}
 
 		const r = await this.db().selectOne(`
@@ -509,7 +520,7 @@ export default class Resource extends BaseItem {
 				WHERE
 					ocr_status = ? AND
 					encryption_applied = 0 AND
-					mime IN ("${supportedMimeTypes.join('","')}")
+					mime IN ('${supportedMimeTypes.join('\',\'')}')
 			`,
 			params: [
 				ResourceOcrStatus.Todo,
@@ -525,7 +536,7 @@ export default class Resource extends BaseItem {
 
 	public static async needOcr(supportedMimeTypes: string[], skippedResourceIds: string[], limit: number, options: LoadOptions): Promise<ResourceEntity[]> {
 		const query = this.baseNeedOcrQuery(this.selectFields(options), supportedMimeTypes);
-		const skippedResourcesSql = skippedResourceIds.length ? `AND resources.id NOT IN  ("${skippedResourceIds.join('","')}")` : '';
+		const skippedResourcesSql = skippedResourceIds.length ? `AND resources.id NOT IN  ('${skippedResourceIds.join('\',\'')}')` : '';
 
 		return await this.db().selectAll(`
 			${query.sql}
@@ -565,7 +576,7 @@ export default class Resource extends BaseItem {
 	public static async resourceOcrTextsByIds(ids: string[]): Promise<ResourceEntity[]> {
 		if (!ids.length) return [];
 		ids = unique(ids);
-		return this.modelSelectAll(`SELECT id, ocr_text FROM resources WHERE id IN ("${ids.join('","')}")`);
+		return this.modelSelectAll(`SELECT id, ocr_text FROM resources WHERE id IN ('${ids.join('\',\'')}')`);
 	}
 
 	public static async allForNormalization(updatedTime: number, id: string, limit = 100, options: LoadOptions = null) {
@@ -584,7 +595,7 @@ export default class Resource extends BaseItem {
 				sql: `
 					SELECT ${this.selectFields(options)} FROM resources
 					WHERE ${whereSql}
-					AND ocr_text != ""
+					AND ocr_text != ''
 					AND ocr_status = ?
 					ORDER BY updated_time ASC, id ASC
 					LIMIT ?
@@ -626,8 +637,12 @@ export default class Resource extends BaseItem {
 		}
 
 		const output = await super.save(resource, options);
-		if (isNew) eventManager.emit(EventName.ResourceCreate);
+		eventManager.emit(isNew ? EventName.ResourceCreate : EventName.ResourceChange, { id: output.id });
 		return output;
+	}
+
+	public static load(id: string, options: LoadOptions = null): Promise<ResourceEntity> {
+		return super.load(id, options);
 	}
 
 }

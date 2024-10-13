@@ -5,7 +5,7 @@ import time from './time';
 import JoplinDatabase, { TableField } from './JoplinDatabase';
 import { LoadOptions, SaveOptions } from './models/utils/types';
 import ActionLogger, { ItemActionType as ItemActionType } from './utils/ActionLogger';
-import { SqlQuery } from './services/database/types';
+import { BaseItemEntity, SqlQuery } from './services/database/types';
 const Mutex = require('async-mutex').Mutex;
 
 // New code should make use of this enum
@@ -167,14 +167,17 @@ class BaseModel {
 		return -1;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
-	public static modelsByIds(items: any[], ids: string[]) {
+	public static modelsByIds<T extends BaseItemEntity>(items: T[], ids: string[]): T[] {
 		const output = [];
-		for (let i = 0; i < items.length; i++) {
-			if (ids.indexOf(items[i].id) >= 0) {
-				output.push(items[i]);
+
+		// Prefer a `Set` to using `ids.includes` -- this gives a better running time.
+		const idSet = new Set(ids);
+		for (const item of items) {
+			if (idSet.has(item.id)) {
+				output.push(item);
 			}
 		}
+
 		return output;
 	}
 
@@ -346,7 +349,7 @@ class BaseModel {
 		if (!options.fields) options.fields = '*';
 
 		let sql = `SELECT ${this.db().escapeFields(options.fields)} FROM \`${this.tableName()}\``;
-		sql += ` WHERE id IN ("${ids.join('","')}")`;
+		sql += ` WHERE id IN ('${ids.join('\',\'')}')`;
 		const q = this.applySqlOptions(options, sql);
 		return this.modelSelectAll(q.sql);
 	}
@@ -745,7 +748,7 @@ class BaseModel {
 
 		options = this.modOptions(options);
 		const idFieldName = options.idFieldName ? options.idFieldName : 'id';
-		const sql = `DELETE FROM ${this.tableName()} WHERE ${idFieldName} IN ("${ids.join('","')}")`;
+		const sql = `DELETE FROM ${this.tableName()} WHERE ${idFieldName} IN ('${ids.join('\',\'')}')`;
 		await this.db().exec(sql);
 	}
 

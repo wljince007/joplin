@@ -4,10 +4,13 @@ import CodeMirror5Emulation from './CodeMirror5Emulation/CodeMirror5Emulation';
 import editorCommands from './editorCommands/editorCommands';
 import { Compartment, EditorSelection, Extension, StateEffect } from '@codemirror/state';
 import { updateLink } from './markdown/markdownCommands';
-import { SearchQuery, setSearchQuery } from '@codemirror/search';
+import { searchPanelOpen, SearchQuery, setSearchQuery } from '@codemirror/search';
 import PluginLoader from './pluginApi/PluginLoader';
 import customEditorCompletion, { editorCompletionSource, enableLanguageDataAutocomplete } from './pluginApi/customEditorCompletion';
 import { CompletionSource } from '@codemirror/autocomplete';
+import { RegionSpec } from './utils/formatting/RegionSpec';
+import toggleInlineSelectionFormat from './utils/formatting/toggleInlineSelectionFormat';
+import getSearchState from './utils/getSearchState';
 
 interface Callbacks {
 	onUndoRedo(): void;
@@ -93,6 +96,25 @@ export default class CodeMirrorControl extends CodeMirror5Emulation implements E
 		this.editor.dispatch(this.editor.state.replaceSelection(text), { userEvent });
 	}
 
+	public wrapSelections(start: string, end: string) {
+		const regionSpec = RegionSpec.of({ template: { start, end } });
+
+		this.editor.dispatch(
+			this.editor.state.changeByRange(range => {
+				const update = toggleInlineSelectionFormat(this.editor.state, regionSpec, range);
+				if (!update.range.empty) {
+					// Deselect the start and end characters (roughly preserve the original
+					// selection).
+					update.range = EditorSelection.range(
+						update.range.from + start.length,
+						update.range.to - end.length,
+					);
+				}
+				return update;
+			}),
+		);
+	}
+
 	public updateBody(newBody: string) {
 		// TODO: doc.toString() can be slow for large documents.
 		const currentBody = this.editor.state.doc.toString();
@@ -102,7 +124,11 @@ export default class CodeMirrorControl extends CodeMirror5Emulation implements E
 			// to ensure that the selection stays within the document
 			// (and thus avoids an exception).
 			const mainCursorPosition = this.editor.state.selection.main.anchor;
-			const newCursorPosition = Math.min(mainCursorPosition, newBody.length);
+
+			// The maximum cursor position needs to be calculated using the EditorState,
+			// to correctly account for line endings.
+			const maxCursorPosition = this.editor.state.toText(newBody).length;
+			const newCursorPosition = Math.min(mainCursorPosition, maxCursorPosition);
 
 			this.editor.dispatch(this.editor.state.update({
 				changes: {
@@ -128,7 +154,15 @@ export default class CodeMirrorControl extends CodeMirror5Emulation implements E
 		this._callbacks.onSettingsChange(newSettings);
 	}
 
+	public getSearchState(): SearchState {
+		return getSearchState(this.editor.state);
+	}
+
 	public setSearchState(newState: SearchState) {
+		if (newState.dialogVisible !== searchPanelOpen(this.editor.state)) {
+			this.execCommand(newState.dialogVisible ? EditorCommandType.ShowSearch : EditorCommandType.HideSearch);
+		}
+
 		const query = new SearchQuery({
 			search: newState.searchText,
 			caseSensitive: newState.caseSensitive,
@@ -136,8 +170,11 @@ export default class CodeMirrorControl extends CodeMirror5Emulation implements E
 			replace: newState.replaceText,
 		});
 		this.editor.dispatch({
-			effects: setSearchQuery.of(query),
+			effects: [
+				setSearchQuery.of(query),
+			],
 		});
+
 	}
 
 	public addStyles(...styles: Parameters<typeof EditorView.theme>) {

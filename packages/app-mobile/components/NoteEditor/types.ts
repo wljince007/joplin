@@ -35,6 +35,7 @@ export interface EditorControl extends EditorBodyControl {
 	toggleUnorderedList(): void;
 	toggleTaskList(): void;
 	toggleHeaderLevel(level: number): void;
+	focus(): void;
 
 	scrollSelectionIntoView(): void;
 	showLinkDialog(): void;
@@ -56,4 +57,5 @@ export interface SelectionRange {
 export interface WebViewToEditorApi {
 	onEditorEvent(event: EditorEvent): Promise<void>;
 	logMessage(message: string): Promise<void>;
+	onPasteFile(type: string, dataBase64: string): Promise<void>;
 }

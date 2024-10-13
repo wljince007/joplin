@@ -48,6 +48,7 @@ import NotePropertiesDialog from '../NotePropertiesDialog';
 import { NoteListColumns } from '@joplin/lib/services/plugins/api/noteListType';
 import validateColumns from '../NoteListHeader/utils/validateColumns';
 import TrashNotification from '../TrashNotification/TrashNotification';
+import UpdateNotification from '../UpdateNotification/UpdateNotification';
 
 const PluginManager = require('@joplin/lib/services/PluginManager');
 const ipcRenderer = require('electron').ipcRenderer;
@@ -85,7 +86,7 @@ interface Props {
 	startupPluginsLoaded: boolean;
 	shareInvitations: ShareInvitation[];
 	isSafeMode: boolean;
-	enableBetaMarkdownEditor: boolean;
+	enableLegacyMarkdownEditor: boolean;
 	needApiAuth: boolean;
 	processingShareInvitationResponse: boolean;
 	isResettingLayout: boolean;
@@ -97,6 +98,7 @@ interface Props {
 	notesSortOrderField: string;
 	notesSortOrderReverse: boolean;
 	notesColumns: NoteListColumns;
+	showInvalidJoplinCloudCredential: boolean;
 }
 
 interface ShareFolderDialogOptions {
@@ -592,6 +594,13 @@ class MainScreenComponent extends React.Component<Props, State> {
 			});
 		};
 
+		const onViewJoplinCloudLoginScreen = () => {
+			this.props.dispatch({
+				type: 'NAV_GO',
+				routeName: 'JoplinCloudLogin',
+			});
+		};
+
 		const onViewSyncSettingsScreen = () => {
 			this.props.dispatch({
 				type: 'NAV_GO',
@@ -684,6 +693,12 @@ class MainScreenComponent extends React.Component<Props, State> {
 			);
 		} else if (this.props.mustUpgradeAppMessage) {
 			msg = this.renderNotificationMessage(this.props.mustUpgradeAppMessage);
+		} else if (this.props.showInvalidJoplinCloudCredential) {
+			msg = this.renderNotificationMessage(
+				_('Your Joplin Cloud credentials are invalid, please login.'),
+				_('Login to Joplin Cloud.'),
+				onViewJoplinCloudLoginScreen,
+			);
 		}
 
 		return (
@@ -705,7 +720,8 @@ class MainScreenComponent extends React.Component<Props, State> {
 			props.isSafeMode ||
 			this.showShareInvitationNotification(props) ||
 			this.props.needApiAuth ||
-			!!this.props.mustUpgradeAppMessage;
+			!!this.props.mustUpgradeAppMessage ||
+			props.showInvalidJoplinCloudCredential;
 	}
 
 	public registerCommands() {
@@ -768,12 +784,12 @@ class MainScreenComponent extends React.Component<Props, State> {
 			},
 
 			editor: () => {
-				let bodyEditor = this.props.settingEditorCodeView ? 'CodeMirror' : 'TinyMCE';
+				let bodyEditor = this.props.settingEditorCodeView ? 'CodeMirror6' : 'TinyMCE';
 
 				if (this.props.isSafeMode) {
 					bodyEditor = 'PlainText';
-				} else if (this.props.settingEditorCodeView && this.props.enableBetaMarkdownEditor) {
-					bodyEditor = 'CodeMirror6';
+				} else if (this.props.settingEditorCodeView && this.props.enableLegacyMarkdownEditor) {
+					bodyEditor = 'CodeMirror5';
 				}
 				return <NoteEditor key={key} bodyEditor={bodyEditor} />;
 			},
@@ -920,6 +936,7 @@ class MainScreenComponent extends React.Component<Props, State> {
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Old code before rule was applied
 					dispatch={this.props.dispatch as any}
 				/>
+				<UpdateNotification themeId={this.props.themeId} />
 				{messageComp}
 				{layoutComp}
 				{pluginDialog}
@@ -954,7 +971,7 @@ const mapStateToProps = (state: AppState) => {
 		shareInvitations: state.shareService.shareInvitations,
 		processingShareInvitationResponse: state.shareService.processingShareInvitationResponse,
 		isSafeMode: state.settings.isSafeMode,
-		enableBetaMarkdownEditor: state.settings['editor.beta'],
+		enableLegacyMarkdownEditor: state.settings['editor.legacyMarkdown'],
 		needApiAuth: state.needApiAuth,
 		isResettingLayout: state.isResettingLayout,
 		listRendererId: state.settings['notes.listRendererId'],
@@ -965,6 +982,7 @@ const mapStateToProps = (state: AppState) => {
 		notesSortOrderField: state.settings['notes.sortOrder.field'],
 		notesSortOrderReverse: state.settings['notes.sortOrder.reverse'],
 		notesColumns: validateColumns(state.settings['notes.columns']),
+		showInvalidJoplinCloudCredential: state.settings['sync.target'] === 10 && state.mustAuthenticate,
 	};
 };
 

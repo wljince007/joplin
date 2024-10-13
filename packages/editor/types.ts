@@ -30,6 +30,8 @@ export enum EditorCommandType {
 	ToggleHeading4 = 'textHeading4',
 	ToggleHeading5 = 'textHeading5',
 
+	InsertHorizontalRule = 'textHorizontalRule',
+
 	// Find commands
 	ShowSearch = 'find',
 	HideSearch = 'hideSearchDialog',
@@ -168,11 +170,16 @@ export interface EditorSettings {
 
 export type LogMessageCallback = (message: string)=> void;
 export type OnEventCallback = (event: EditorEvent)=> void;
+export type PasteFileCallback = (data: File)=> Promise<void>;
+type OnScrollPastBeginningCallback = ()=> void;
 
 export interface EditorProps {
 	settings: EditorSettings;
 	initialText: string;
 
+	// If null, paste and drag-and-drop will not work for resources unless handled elsewhere.
+	onPasteFile: PasteFileCallback|null;
+	onSelectPastBeginning?: OnScrollPastBeginningCallback;
 	onEvent: OnEventCallback;
 	onLogMessage: LogMessageCallback;
 }

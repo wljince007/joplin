@@ -43,6 +43,7 @@ export default class Plugin {
 	private dataDir_: string;
 	private dataDirCreated_ = false;
 	private hasErrors_ = false;
+	private running_ = false;
 	private onUnloadListeners_: OnUnloadListener[] = [];
 
 	// eslint-disable-next-line @typescript-eslint/ban-types -- Old code before rule was applied
@@ -87,7 +88,19 @@ export default class Plugin {
 		return this.baseDir_;
 	}
 
-	public async dataDir(): Promise<string> {
+	public get running(): boolean {
+		return this.running_;
+	}
+
+	public set running(running: boolean) {
+		this.running_ = running;
+	}
+
+	public get dataDir(): string {
+		return shim.fsDriver().resolve(this.dataDir_);
+	}
+
+	public async createAndGetDataDir(): Promise<string> {
 		if (this.dataDirCreated_) return this.dataDir_;
 
 		if (!(await shim.fsDriver().exists(this.dataDir_))) {
